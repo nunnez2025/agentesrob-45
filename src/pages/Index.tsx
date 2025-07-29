@@ -97,7 +97,7 @@ const Index = () => {
                   <Textarea
                     value={projectDescription}
                     onChange={(e) => setProjectDescription(e.target.value)}
-                    placeholder="Descreva o que você quer desenvolver, principais funcionalidades, público-alvo..."
+                    placeholder="Inclua as linguagens e tecnologias desejadas (ex: HTML, CSS, JavaScript, Python, React, Node.js, Java, UX/UI, etc.) e descreva o projeto..."
                     rows={4}
                     required
                   />
@@ -158,42 +158,6 @@ const Index = () => {
         {/* Painel Principal com Relatório */}
         <ProjectReport project={project} agents={agents} />
 
-        {/* Chat dos Agentes */}
-        <Card className="h-[500px] flex flex-col">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
-              Chat com os Agentes
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 p-0">
-            <ChatInterface
-              messages={messages}
-              agents={agents}
-              onSendMessage={sendMessage}
-              isLoading={isProcessing}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Monitor do Projeto */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bot className="h-5 w-5" />
-              Monitor do Projeto
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="aspect-video bg-slate-900 rounded-lg flex items-center justify-center">
-              <iframe
-                src="data:text/html,<html><body style='margin:0;padding:20px;font-family:Arial;background:linear-gradient(135deg,%23667eea,%23764ba2);color:white;text-align:center'><h1>🚀 Projeto Finalizado</h1><p>Preview do projeto funcionando</p><div style='margin-top:50px;font-size:48px'>✅</div></body></html>"
-                className="w-full h-full rounded-lg border-0"
-                title="Projeto Funcionando"
-              />
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
