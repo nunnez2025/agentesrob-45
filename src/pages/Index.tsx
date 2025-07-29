@@ -154,33 +154,45 @@ const Index = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Painel Principal com Relatório */}
-          <div className="lg:col-span-1">
-            <ProjectReport project={project} agents={agents} />
-          </div>
+      <div className="max-w-7xl mx-auto p-6 space-y-6">
+        {/* Painel Principal com Relatório */}
+        <ProjectReport project={project} agents={agents} />
 
-          {/* Chat dos Agentes */}
-          <div className="lg:col-span-1">
-            <Card className="h-[800px] flex flex-col">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5" />
-                  Chat dos Agentes
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1 p-0">
-                <ChatInterface
-                  messages={messages}
-                  agents={agents}
-                  onSendMessage={sendMessage}
-                  isLoading={isProcessing}
-                />
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        {/* Chat dos Agentes */}
+        <Card className="h-[400px] flex flex-col">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Chat dos Agentes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 p-0">
+            <ChatInterface
+              messages={messages}
+              agents={agents}
+              onSendMessage={sendMessage}
+              isLoading={isProcessing}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Monitor do Projeto */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              📺 Monitor do Projeto
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="aspect-video bg-slate-900 rounded-lg flex items-center justify-center">
+              <iframe
+                src="data:text/html,<html><body style='margin:0;padding:20px;font-family:Arial;background:linear-gradient(135deg,%23667eea,%23764ba2);color:white;text-align:center'><h1>🚀 Projeto em Desenvolvimento</h1><p>Os agentes estão trabalhando...</p><div style='margin-top:50px;font-size:48px'>⚙️</div></body></html>"
+                className="w-full h-full rounded-lg border-0"
+                title="Preview do Projeto"
+              />
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
