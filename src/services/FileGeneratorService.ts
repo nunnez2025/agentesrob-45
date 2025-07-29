@@ -69,6 +69,70 @@ class FileGeneratorService {
       'seo-specialist': [
         `${baseContext}\n\nCrie arquivo robots.txt e sitemap.xml otimizados para SEO.`,
         `${baseContext}\n\nCrie meta tags e structured data para melhor indexação.`
+      ],
+      'ai-specialist': [
+        `${baseContext}\n\nCrie modelos de IA e algoritmos de machine learning em Python.`,
+        `${baseContext}\n\nCrie pipeline de treinamento e avaliação de modelos com TensorFlow/PyTorch.`
+      ],
+      'ml-engineer': [
+        `${baseContext}\n\nCrie infraestrutura MLOps com Docker, Kubernetes e pipeline CI/CD.`,
+        `${baseContext}\n\nCrie APIs de modelo de ML com FastAPI e monitoramento.`
+      ],
+      'data-scientist': [
+        `${baseContext}\n\nCrie análise exploratória de dados com Pandas e visualizações.`,
+        `${baseContext}\n\nCrie notebooks Jupyter com análise estatística e insights.`
+      ],
+      'python-dev': [
+        `${baseContext}\n\nCrie aplicação Python com Flask/Django e estrutura clean code.`,
+        `${baseContext}\n\nCrie scripts de automação e processamento de dados.`
+      ],
+      'react-dev': [
+        `${baseContext}\n\nCrie aplicação React completa com hooks, context e estado global.`,
+        `${baseContext}\n\nCrie componentes reutilizáveis e otimizados para performance.`
+      ],
+      'nodejs-dev': [
+        `${baseContext}\n\nCrie API REST com Node.js, Express e autenticação JWT.`,
+        `${baseContext}\n\nCrie microserviços com arquitetura escalável.`
+      ],
+      'mobile-dev': [
+        `${baseContext}\n\nCrie aplicativo mobile com React Native e navegação.`,
+        `${baseContext}\n\nCrie integração com APIs nativas e push notifications.`
+      ],
+      'devops': [
+        `${baseContext}\n\nCrie pipeline CI/CD com GitHub Actions e deployment automático.`,
+        `${baseContext}\n\nCrie infraestrutura como código com Terraform/CloudFormation.`
+      ],
+      'security-engineer': [
+        `${baseContext}\n\nCrie análise de segurança e implementação de protocolos.`,
+        `${baseContext}\n\nCrie testes de penetração e relatórios de vulnerabilidade.`
+      ],
+      'blockchain-dev': [
+        `${baseContext}\n\nCrie smart contracts em Solidity e Web3 integration.`,
+        `${baseContext}\n\nCrie DApp completo com frontend e blockchain backend.`
+      ],
+      'fullstack-dev': [
+        `${baseContext}\n\nCrie aplicação full-stack com frontend React e backend Node.js.`,
+        `${baseContext}\n\nCrie arquitetura completa com banco de dados e deploy.`
+      ],
+      'api-dev': [
+        `${baseContext}\n\nCrie API RESTful completa com documentação OpenAPI/Swagger.`,
+        `${baseContext}\n\nCrie GraphQL API com resolvers e schema otimizado.`
+      ],
+      'database-dev': [
+        `${baseContext}\n\nCrie esquema de banco de dados SQL/NoSQL otimizado.`,
+        `${baseContext}\n\nCrie queries complexas e procedures para performance.`
+      ],
+      'cloud-architect': [
+        `${baseContext}\n\nCrie arquitetura cloud AWS/Azure com escalabilidade.`,
+        `${baseContext}\n\nCrie configuração de serviços serverless e containers.`
+      ],
+      'code-reviewer': [
+        `${baseContext}\n\nCrie review de código com análise de qualidade e sugestões.`,
+        `${baseContext}\n\nCrie documentação de boas práticas e padrões de código.`
+      ],
+      'performance-optimizer': [
+        `${baseContext}\n\nCrie análise de performance e otimizações de código.`,
+        `${baseContext}\n\nCrie monitoramento e métricas de aplicação em produção.`
       ]
     };
 
@@ -127,7 +191,23 @@ class FileGeneratorService {
       'game-analyst': ['gameplay.md', 'mechanics.md'],
       'philosopher': ['ethics.md', 'philosophy.md'],
       'director': ['strategy.md', 'vision.md'],
-      'seo-specialist': ['robots.txt', 'sitemap.xml']
+      'seo-specialist': ['robots.txt', 'sitemap.xml'],
+      'ai-specialist': ['ai_model.py', 'training_pipeline.py'],
+      'ml-engineer': ['mlops_config.yml', 'model_api.py'],
+      'data-scientist': ['data_analysis.ipynb', 'insights.py'],
+      'python-dev': ['main.py', 'requirements.txt'],
+      'react-dev': ['components.tsx', 'hooks.ts'],
+      'nodejs-dev': ['server.js', 'api.js'],
+      'mobile-dev': ['App.tsx', 'navigation.tsx'],
+      'devops': ['ci-cd.yml', 'infrastructure.tf'],
+      'security-engineer': ['security_audit.md', 'pentest.py'],
+      'blockchain-dev': ['contract.sol', 'dapp.js'],
+      'fullstack-dev': ['fullstack_app.tsx', 'backend.js'],
+      'api-dev': ['api_spec.yml', 'endpoints.js'],
+      'database-dev': ['schema.sql', 'queries.sql'],
+      'cloud-architect': ['cloud_architecture.yml', 'serverless.yml'],
+      'code-reviewer': ['code_review.md', 'standards.md'],
+      'performance-optimizer': ['performance_analysis.md', 'optimization.js']
     };
 
     const names = defaultNames[role] || ['document.md'];
@@ -162,7 +242,23 @@ class FileGeneratorService {
       'game-analyst': 'docs/game/',
       'philosopher': 'docs/philosophy/',
       'director': 'docs/strategy/',
-      'seo-specialist': 'public/'
+      'seo-specialist': 'public/',
+      'ai-specialist': 'ai/',
+      'ml-engineer': 'ml/',
+      'data-scientist': 'data/',
+      'python-dev': 'python/',
+      'react-dev': 'src/components/',
+      'nodejs-dev': 'backend/',
+      'mobile-dev': 'mobile/',
+      'devops': 'ops/',
+      'security-engineer': 'security/',
+      'blockchain-dev': 'blockchain/',
+      'fullstack-dev': 'fullstack/',
+      'api-dev': 'api/',
+      'database-dev': 'database/',
+      'cloud-architect': 'cloud/',
+      'code-reviewer': 'reviews/',
+      'performance-optimizer': 'performance/'
     };
 
     return (rolePaths[role] || 'docs/') + fileName;

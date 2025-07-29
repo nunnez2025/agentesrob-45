@@ -7,6 +7,7 @@ import { AgentCard } from '@/components/AgentCard';
 import { ChatInterface } from '@/components/ChatInterface';
 import { ProjectDashboard } from '@/components/ProjectDashboard';
 import { AIKeySetup } from '@/components/AIKeySetup';
+import { ProjectReport } from '@/components/ProjectReport';
 import { useAgentSystem } from '@/hooks/useAgentSystem';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Users, MessageSquare, BarChart3, Settings, Bot } from 'lucide-react';
@@ -155,7 +156,7 @@ const Index = () => {
 
       <div className="max-w-7xl mx-auto p-6">
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Dashboard
@@ -163,6 +164,9 @@ const Index = () => {
             <TabsTrigger value="agents" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Agentes
+            </TabsTrigger>
+            <TabsTrigger value="report" className="flex items-center gap-2">
+              📊 Relatório & ZIP
             </TabsTrigger>
             <TabsTrigger value="chat" className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
@@ -194,6 +198,10 @@ const Index = () => {
                 />
               ))}
             </div>
+          </TabsContent>
+
+          <TabsContent value="report" className="mt-0">
+            <ProjectReport project={project} agents={agents} />
           </TabsContent>
 
           <TabsContent value="chat" className="mt-0">

@@ -27,7 +27,7 @@ class AIService {
         messages: [
           {
             role: 'system',
-            content: `Você é um ${role} experiente. Responda de forma prática e concisa.`
+            content: `Você é um ${role} experiente. Responda de forma prática e concisa com código quando necessário.`
           },
           {
             role: 'user',
@@ -35,7 +35,7 @@ class AIService {
           }
         ],
         temperature: 0.7,
-        max_tokens: 1000
+        max_tokens: 2000
       }),
       parseResponse: (response: any) => response.choices[0]?.message?.content || 'Resposta não disponível'
     },
@@ -53,10 +53,74 @@ class AIService {
         }],
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 1000
+          maxOutputTokens: 2000
         }
       }),
       parseResponse: (response: any) => response.candidates[0]?.content?.parts[0]?.text || 'Resposta não disponível'
+    },
+    {
+      name: 'DeepSeek',
+      endpoint: 'https://api.deepseek.com/v1/chat/completions',
+      headers: (apiKey: string) => ({
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      }),
+      formatRequest: (prompt: string, role: string) => ({
+        model: 'deepseek-coder',
+        messages: [
+          {
+            role: 'system',
+            content: `Você é um ${role} especializado. Foque em soluções práticas e código eficiente.`
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
+      }),
+      parseResponse: (response: any) => response.choices[0]?.message?.content || 'Resposta não disponível'
+    },
+    {
+      name: 'Grok',
+      endpoint: 'https://api.x.ai/v1/chat/completions',
+      headers: (apiKey: string) => ({
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      }),
+      formatRequest: (prompt: string, role: string) => ({
+        model: 'grok-beta',
+        messages: [
+          {
+            role: 'system',
+            content: `Você é um ${role} criativo e eficiente. Forneça soluções inovadoras.`
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.8,
+        max_tokens: 2000
+      }),
+      parseResponse: (response: any) => response.choices[0]?.message?.content || 'Resposta não disponível'
+    },
+    {
+      name: 'Flowise',
+      endpoint: 'https://api.flowise.com/api/v1/prediction',
+      headers: (apiKey: string) => ({
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      }),
+      formatRequest: (prompt: string, role: string) => ({
+        question: `Como ${role}: ${prompt}`,
+        overrideConfig: {
+          temperature: 0.7,
+          maxTokens: 2000
+        }
+      }),
+      parseResponse: (response: any) => response.text || response.answer || 'Resposta não disponível'
     }
   ];
 

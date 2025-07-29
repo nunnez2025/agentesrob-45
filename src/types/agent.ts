@@ -23,7 +23,23 @@ export type AgentRole =
   | 'game-analyst'
   | 'philosopher'
   | 'director'
-  | 'seo-specialist';
+  | 'seo-specialist'
+  | 'ai-specialist'
+  | 'ml-engineer'
+  | 'data-scientist'
+  | 'python-dev'
+  | 'react-dev'
+  | 'nodejs-dev'
+  | 'mobile-dev'
+  | 'devops'
+  | 'security-engineer'
+  | 'blockchain-dev'
+  | 'fullstack-dev'
+  | 'api-dev'
+  | 'database-dev'
+  | 'cloud-architect'
+  | 'code-reviewer'
+  | 'performance-optimizer';
 
 export type AgentStatus = 'available' | 'busy' | 'thinking' | 'offline' | 'working';
 

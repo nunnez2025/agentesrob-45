@@ -10,7 +10,10 @@ import { useToast } from '@/hooks/use-toast';
 export const AIKeySetup = () => {
   const [keys, setKeys] = useState({
     openai: '',
-    gemini: ''
+    gemini: '',
+    deepseek: '',
+    grok: '',
+    flowise: ''
   });
   const [providers, setProviders] = useState(aiService.getAvailableProviders());
   const { toast } = useToast();
@@ -101,13 +104,88 @@ export const AIKeySetup = () => {
           </div>
         </div>
 
+        {/* DeepSeek */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">DeepSeek Coder</label>
+            {providers.find(p => p.name === 'DeepSeek')?.hasKey && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <CheckCircle className="h-3 w-3" />
+                Configurado
+              </Badge>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              type="password"
+              placeholder="sk-..."
+              value={keys.deepseek}
+              onChange={(e) => setKeys(prev => ({ ...prev, deepseek: e.target.value }))}
+            />
+            <Button onClick={() => handleSaveKey('DeepSeek', keys.deepseek)}>
+              Salvar
+            </Button>
+          </div>
+        </div>
+
+        {/* Grok */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">Grok (X.AI)</label>
+            {providers.find(p => p.name === 'Grok')?.hasKey && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <CheckCircle className="h-3 w-3" />
+                Configurado
+              </Badge>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              type="password"
+              placeholder="xai-..."
+              value={keys.grok}
+              onChange={(e) => setKeys(prev => ({ ...prev, grok: e.target.value }))}
+            />
+            <Button onClick={() => handleSaveKey('Grok', keys.grok)}>
+              Salvar
+            </Button>
+          </div>
+        </div>
+
+        {/* Flowise */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium">Flowise</label>
+            {providers.find(p => p.name === 'Flowise')?.hasKey && (
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <CheckCircle className="h-3 w-3" />
+                Configurado
+              </Badge>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              type="password"
+              placeholder="V2Zu_..."
+              value={keys.flowise}
+              onChange={(e) => setKeys(prev => ({ ...prev, flowise: e.target.value }))}
+            />
+            <Button onClick={() => handleSaveKey('Flowise', keys.flowise)}>
+              Salvar
+            </Button>
+          </div>
+        </div>
+
         {/* Quick Setup */}
         <div className="p-4 bg-muted rounded-lg space-y-2">
-          <h4 className="font-medium text-sm">Setup Rápido</h4>
+          <h4 className="font-medium text-sm">Setup Rápido - Todas as APIs</h4>
           <div className="space-y-1 text-xs text-muted-foreground">
-            <p>• <strong>OpenAI:</strong> Melhor qualidade, requer chave paga</p>
-            <p>• <strong>Gemini:</strong> Boa qualidade, alternativa ao OpenAI</p>
-            <p>• <strong>Hugging Face:</strong> Gratuito, usado como fallback automático</p>
+            <p>• <strong>OpenAI:</strong> GPT-4 - Melhor qualidade geral</p>
+            <p>• <strong>Gemini:</strong> Google - Boa qualidade e velocidade</p>
+            <p>• <strong>DeepSeek:</strong> Especializado em código</p>
+            <p>• <strong>Grok:</strong> X.AI - Modelo criativo</p>
+            <p>• <strong>Flowise:</strong> Workflows personalizados</p>
+            <p>• <strong>Hugging Face:</strong> Modelos open source gratuitos</p>
           </div>
           <Button 
             variant="outline" 
@@ -115,15 +193,22 @@ export const AIKeySetup = () => {
             onClick={() => {
               handleSaveKey('OpenAI', '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');
               handleSaveKey('Gemini', 'AIzaSyBRxsnUY-PTT95EiY6yVTCaDz7DeJLgc9E');
+              handleSaveKey('DeepSeek', 'sk-4001fb4f0ab44836817907e524a520ae');
+              handleSaveKey('Grok', 'xai-lm9TeAFhMVeOSjlzrUeTkth25T3dmy692MbBIGOKoibjGbajmeMwvxBJnRO3KyxIVelRnjCj7nRkm6M2');
+              handleSaveKey('Flowise', 'V2Zu_LGe9GoO4JIbqejaAevJ62pew-7AD7uqvITCw40');
+              toast({
+                title: "Todas as Chaves Configuradas!",
+                description: "Sistema de fallback automático ativado com 5 APIs",
+              });
             }}
           >
-            Usar Chaves Fornecidas
+            🚀 Configurar Todas as APIs
           </Button>
         </div>
 
         {/* Status */}
         <div className="text-xs text-muted-foreground">
-          Sistema com fallback automático: OpenAI → Gemini → Hugging Face (gratuito)
+          Sistema com fallback automático: OpenAI → Gemini → DeepSeek → Grok → Flowise → Hugging Face (gratuito)
         </div>
       </CardContent>
     </Card>
