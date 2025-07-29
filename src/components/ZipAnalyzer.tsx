@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   Upload, 
   FileText, 
@@ -11,7 +13,10 @@ import {
   Trash2, 
   Zap,
   Package,
-  AlertCircle
+  AlertCircle,
+  Send,
+  Bot,
+  User
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { aiService } from '@/services/AIService';
@@ -21,6 +26,13 @@ interface ZipFile {
   filename: string;
   content: string | null;
   isDirectory: boolean;
+}
+
+interface ChatMessage {
+  id: string;
+  content: string;
+  sender: 'user' | 'agent';
+  timestamp: Date;
 }
 
 interface ZipAnalysis {
@@ -43,6 +55,9 @@ export const ZipAnalyzer = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [modifiedZip, setModifiedZip] = useState<Blob | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [isChatLoading, setIsChatLoading] = useState(false);
   const { toast } = useToast();
 
   const textFileExtensions = ['.html', '.js', '.css', '.txt', '.json', '.md', '.jsx', '.ts', '.tsx', '.py', '.php'];
@@ -280,11 +295,57 @@ Instrução: ${userPrompt}`;
     });
   };
 
-  const clearAll = () => {
-    setUserPrompt('');
-    setAnalysisResult('');
-    setSelectedFiles(new Set());
-    setModifiedZip(null);
+  const sendChatMessage = async () => {
+    if (!chatInput.trim() || !zipFiles.length) return;
+
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      content: chatInput,
+      sender: 'user',
+      timestamp: new Date()
+    };
+
+    setChatMessages(prev => [...prev, userMessage]);
+    setChatInput('');
+    setIsChatLoading(true);
+
+    try {
+      // Contexto dos arquivos analisados
+      let context = "Arquivos no projeto ZIP:\n";
+      zipFiles.forEach(file => {
+        context += `- ${file.filename}${file.isDirectory ? ' (pasta)' : ''}\n`;
+        if (file.content && file.content.length < 1000) {
+          context += `  Conteúdo: ${file.content.substring(0, 500)}...\n`;
+        }
+      });
+
+      const prompt = `Você é um especialista em análise de projetos. Analise os arquivos do ZIP e responda à solicitação do usuário.
+
+${context}
+
+Usuário: ${chatInput}
+
+Responda de forma técnica e específica sobre o projeto, sugerindo melhorias, identificando problemas ou explicando a estrutura.`;
+
+      const response = await aiService.generateResponse(prompt, 'ai-specialist');
+      
+      const agentMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        content: response.content,
+        sender: 'agent',
+        timestamp: new Date()
+      };
+
+      setChatMessages(prev => [...prev, agentMessage]);
+    } catch (error) {
+      toast({
+        title: "Erro no chat",
+        description: "Não foi possível processar a mensagem",
+        variant: "destructive"
+      });
+    } finally {
+      setIsChatLoading(false);
+    }
   };
 
   return (
@@ -386,10 +447,6 @@ Instrução: ${userPrompt}`;
                       <FileText className="h-4 w-4 mr-2" />
                       Aplicar Alterações
                     </Button>
-                    <Button onClick={clearAll} variant="ghost">
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Limpar
-                    </Button>
                   </div>
                 </div>
               )}
@@ -412,6 +469,104 @@ Instrução: ${userPrompt}`;
           )}
         </CardContent>
       </Card>
+
+      {/* Chat com os Agentes */}
+      {zipFiles.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bot className="h-5 w-5" />
+              Conversar com Agentes sobre o Projeto
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Área de mensagens */}
+            <ScrollArea className="h-80 mb-4 p-4 border rounded-lg">
+              {chatMessages.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8">
+                  <Bot className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p>Comece uma conversa sobre o projeto analisado</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {chatMessages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex gap-3 ${
+                        message.sender === 'user' ? 'justify-end' : 'justify-start'
+                      }`}
+                    >
+                      <div
+                        className={`max-w-[80%] p-3 rounded-lg ${
+                          message.sender === 'user'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          {message.sender === 'user' ? (
+                            <User className="h-4 w-4" />
+                          ) : (
+                            <Bot className="h-4 w-4" />
+                          )}
+                          <span className="text-xs opacity-70">
+                            {message.timestamp.toLocaleTimeString()}
+                          </span>
+                        </div>
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      </div>
+                    </div>
+                  ))}
+                  {isChatLoading && (
+                    <div className="flex justify-start">
+                      <div className="bg-muted p-3 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Bot className="h-4 w-4 animate-spin" />
+                          <span className="text-sm">Agente pensando...</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </ScrollArea>
+
+            {/* Input de chat */}
+            <div className="flex gap-2">
+              <Input
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                placeholder="Pergunte sobre o projeto, solicite melhorias ou análises..."
+                onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
+                disabled={isChatLoading}
+              />
+              <Button 
+                onClick={sendChatMessage}
+                disabled={isChatLoading || !chatInput.trim()}
+                size="icon"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Botão de download sempre visível quando há arquivos */}
+            {modifiedZip && (
+              <div className="mt-4 p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertCircle className="h-4 w-4 text-green-600" />
+                  <span className="text-sm font-medium text-green-800 dark:text-green-200">
+                    Projeto modificado disponível para download
+                  </span>
+                </div>
+                <Button onClick={downloadModifiedZip} className="w-full">
+                  <Download className="h-4 w-4 mr-2" />
+                  Baixar Projeto Final
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
