@@ -155,37 +155,24 @@ const Index = () => {
       </div>
 
       <div className="max-w-7xl mx-auto p-6">
-        <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6">
-            <TabsTrigger value="dashboard" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="agents" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Agentes
-            </TabsTrigger>
+        <Tabs defaultValue="report" className="w-full">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="report" className="flex items-center gap-2">
-              📊 Relatório & ZIP
+              📊 Painel Principal
             </TabsTrigger>
             <TabsTrigger value="chat" className="flex items-center gap-2">
               <MessageSquare className="h-4 w-4" />
               Chat IA
+            </TabsTrigger>
+            <TabsTrigger value="agents" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Agentes
             </TabsTrigger>
             <TabsTrigger value="ai-setup" className="flex items-center gap-2">
               <Bot className="h-4 w-4" />
               APIs IA
             </TabsTrigger>
           </TabsList>
-
-          <TabsContent value="dashboard" className="mt-0">
-            <ProjectDashboard
-              project={project}
-              onApproveProject={approveProject}
-              onDownloadProject={downloadProject}
-              onGenerateReport={generateReport}
-            />
-          </TabsContent>
 
           <TabsContent value="agents" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
