@@ -261,7 +261,7 @@ class FileGeneratorService {
       'performance-optimizer': 'performance/'
     };
 
-    return (rolePaths[role] || 'docs/') + fileName;
+    return rolePaths[role] || 'docs/';
   }
 
   private cleanContent(content: string): string {
@@ -294,7 +294,8 @@ class FileGeneratorService {
 
     // Add all generated files
     files.forEach(file => {
-      zip.file(file.path, file.content);
+      const fullPath = file.path.endsWith('/') ? file.path + file.name : file.path + file.name;
+      zip.file(fullPath, file.content);
     });
 
     // Generate and return ZIP blob
