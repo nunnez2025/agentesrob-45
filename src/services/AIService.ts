@@ -144,6 +144,24 @@ class AIService {
     localStorage.setItem(`ai_api_key_${provider.toLowerCase()}`, apiKey);
   }
 
+  public async testApiKey(provider: string, apiKey: string): Promise<{ success: boolean; error?: string }> {
+    const providerConfig = this.providers.find(p => p.name.toLowerCase() === provider.toLowerCase());
+    if (!providerConfig) {
+      return { success: false, error: 'Provider not found' };
+    }
+
+    try {
+      const testPrompt = "Responda apenas 'OK' se você conseguir me ouvir.";
+      const response = await this.callProvider(providerConfig, testPrompt, 'system-test', apiKey);
+      return { success: response.success };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'API test failed' 
+      };
+    }
+  }
+
   public async generateResponse(prompt: string, agentRole: string): Promise<AIResponse> {
     // First check if any API keys are configured
     const hasAnyApiKey = this.providers.some(provider => this.getApiKey(provider.name));

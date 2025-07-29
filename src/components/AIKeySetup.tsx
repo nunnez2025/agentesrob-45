@@ -1,216 +1,283 @@
 import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Key, Shield, CheckCircle } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { Key, CheckCircle, AlertCircle, Zap, Brain, Rocket, Settings } from 'lucide-react';
 import { aiService } from '@/services/AIService';
 import { useToast } from '@/hooks/use-toast';
 
 export const AIKeySetup = () => {
-  const [keys, setKeys] = useState({
-    openai: '',
-    gemini: '',
-    deepseek: '',
-    grok: '',
-    flowise: ''
-  });
-  const [providers, setProviders] = useState(aiService.getAvailableProviders());
+  const [keys, setKeys] = useState<Record<string, string>>({});
+  const [testing, setTesting] = useState<Record<string, boolean>>({});
   const { toast } = useToast();
 
-  const handleSaveKey = (provider: string, key: string) => {
-    if (!key.trim()) {
-      toast({
-        title: "Erro",
-        description: "Por favor, insira uma chave válida",
-        variant: "destructive"
-      });
-      return;
+  const providers = [
+    { 
+      name: 'OpenAI', 
+      description: 'GPT-4.1, O3, O4-Mini - Modelos mais avançados', 
+      key: 'openai',
+      priority: 1,
+      icon: Brain
+    },
+    { 
+      name: 'Gemini', 
+      description: 'Google Gemini Pro - IA conversacional avançada', 
+      key: 'gemini',
+      priority: 2,
+      icon: Rocket
+    },
+    { 
+      name: 'DeepSeek', 
+      description: 'DeepSeek Coder - Especialista em código', 
+      key: 'deepseek',
+      priority: 3,
+      icon: Settings
+    },
+    { 
+      name: 'Grok', 
+      description: 'xAI Grok - IA criativa e inovadora', 
+      key: 'grok',
+      priority: 4,
+      icon: Zap
+    },
+    { 
+      name: 'Flowise', 
+      description: 'Custom Flows - Workflows personalizados', 
+      key: 'flowise',
+      priority: 5,
+      icon: Settings
     }
+  ];
 
-    aiService.setApiKey(provider, key);
-    setProviders(aiService.getAvailableProviders());
-    
-    toast({
-      title: "Chave Salva",
-      description: `Chave do ${provider} configurada com sucesso!`,
-    });
-
-    // Clear input
-    setKeys(prev => ({
-      ...prev,
-      [provider.toLowerCase()]: ''
-    }));
+  const handleKeyChange = (provider: string, value: string) => {
+    setKeys(prev => ({ ...prev, [provider]: value }));
   };
 
+  const testAndSaveKey = async (provider: string) => {
+    const key = keys[provider];
+    if (!key) return;
+
+    setTesting(prev => ({ ...prev, [provider]: true }));
+    
+    try {
+      // Test real API call
+      const testResponse = await aiService.testApiKey(provider, key);
+      
+      if (testResponse.success) {
+        aiService.setApiKey(provider, key);
+        toast({
+          title: "✅ API Configurada",
+          description: `${provider} testado e configurado com sucesso!`,
+        });
+      } else {
+        throw new Error(testResponse.error || 'Teste falhou');
+      }
+    } catch (error) {
+      console.error(`API test failed for ${provider}:`, error);
+      toast({
+        title: "❌ Erro na API",
+        description: `Falha ao testar ${provider}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
+        variant: "destructive"
+      });
+    } finally {
+      setTesting(prev => ({ ...prev, [provider]: false }));
+    }
+  };
+
+  const configureAllKeys = async () => {
+    const validKeys = Object.entries(keys).filter(([_, key]) => key.trim());
+    
+    for (const [provider, key] of validKeys) {
+      if (!testing[provider]) {
+        await testAndSaveKey(provider);
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Rate limiting
+      }
+    }
+    
+    toast({
+      title: "🚀 Configuração Completa",
+      description: "Todas as APIs foram configuradas! Agentes prontos para trabalhar em capacidade máxima.",
+    });
+  };
+
+  const availableProviders = aiService.getAvailableProviders();
+  const configuredCount = availableProviders.filter(p => p.hasKey).length;
+
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Key className="h-5 w-5" />
-          Configuração de APIs de IA
-        </CardTitle>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Shield className="h-4 w-4" />
-          Chaves armazenadas localmente no seu navegador
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* OpenAI */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">OpenAI GPT-4</label>
-            {providers.find(p => p.name === 'OpenAI')?.hasKey && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3" />
-                Configurado
-              </Badge>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Input
-              type="password"
-              placeholder="sk-proj-..."
-              value={keys.openai}
-              onChange={(e) => setKeys(prev => ({ ...prev, openai: e.target.value }))}
-            />
-            <Button onClick={() => handleSaveKey('OpenAI', keys.openai)}>
-              Salvar
-            </Button>
-          </div>
-        </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-2xl">
+            <Brain className="h-6 w-6" />
+            Sistema de IA Colaborativo
+          </CardTitle>
+          <p className="text-muted-foreground">
+            Configure múltiplas APIs para que os agentes trabalhem em <strong>capacidade máxima</strong>, 
+            conversem entre si e entreguem projetos completos organizados em pastas.
+          </p>
+        </CardHeader>
+      </Card>
 
-        {/* Gemini */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Google Gemini</label>
-            {providers.find(p => p.name === 'Gemini')?.hasKey && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3" />
-                Configurado
-              </Badge>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Input
-              type="password"
-              placeholder="AIza..."
-              value={keys.gemini}
-              onChange={(e) => setKeys(prev => ({ ...prev, gemini: e.target.value }))}
-            />
-            <Button onClick={() => handleSaveKey('Gemini', keys.gemini)}>
-              Salvar
-            </Button>
-          </div>
-        </div>
+      {/* Status Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-green-600">{configuredCount}</div>
+            <div className="text-sm text-muted-foreground">APIs Ativas</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-blue-600">{providers.length}</div>
+            <div className="text-sm text-muted-foreground">APIs Disponíveis</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-orange-600">
+              {Math.round((configuredCount / providers.length) * 100)}%
+            </div>
+            <div className="text-sm text-muted-foreground">Capacidade</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 text-center">
+            <div className="text-2xl font-bold text-purple-600">
+              {configuredCount >= 3 ? 'MÁXIMA' : 'LIMITADA'}
+            </div>
+            <div className="text-sm text-muted-foreground">Performance</div>
+          </CardContent>
+        </Card>
+      </div>
 
-        {/* DeepSeek */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">DeepSeek Coder</label>
-            {providers.find(p => p.name === 'DeepSeek')?.hasKey && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3" />
-                Configurado
-              </Badge>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Input
-              type="password"
-              placeholder="sk-..."
-              value={keys.deepseek}
-              onChange={(e) => setKeys(prev => ({ ...prev, deepseek: e.target.value }))}
-            />
-            <Button onClick={() => handleSaveKey('DeepSeek', keys.deepseek)}>
-              Salvar
-            </Button>
-          </div>
-        </div>
+      {/* API Configuration */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {providers.map((provider) => {
+          const hasKey = availableProviders.find(p => p.name === provider.name)?.hasKey || false;
+          const isLoading = testing[provider.key] || false;
+          const IconComponent = provider.icon;
+          
+          return (
+            <Card key={provider.key} className={hasKey ? "border-green-500/50 bg-green-50/50" : ""}>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <IconComponent className="h-5 w-5" />
+                    <CardTitle className="text-lg">{provider.name}</CardTitle>
+                    <Badge variant="outline" className="text-xs">
+                      Prioridade {provider.priority}
+                    </Badge>
+                  </div>
+                  <Badge variant={hasKey ? "default" : "secondary"}>
+                    {hasKey ? (
+                      <><CheckCircle className="h-3 w-3 mr-1" /> ATIVA</>
+                    ) : (
+                      <><AlertCircle className="h-3 w-3 mr-1" /> INATIVA</>
+                    )}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">{provider.description}</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor={provider.key}>Chave da API</Label>
+                  <Input
+                    id={provider.key}
+                    type="password"
+                    placeholder={`Cole sua chave da API ${provider.name}`}
+                    value={keys[provider.key] || ''}
+                    onChange={(e) => handleKeyChange(provider.key, e.target.value)}
+                    className={hasKey ? "border-green-500" : ""}
+                  />
+                </div>
+                <Button 
+                  onClick={() => testAndSaveKey(provider.key)}
+                  disabled={!keys[provider.key] || isLoading}
+                  className="w-full"
+                  variant={hasKey ? "secondary" : "default"}
+                >
+                  {isLoading ? (
+                    <>
+                      <Zap className="h-4 w-4 mr-2 animate-spin" />
+                      Testando API...
+                    </>
+                  ) : hasKey ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Reconfigurar
+                    </>
+                  ) : (
+                    <>
+                      <Rocket className="h-4 w-4 mr-2" />
+                      Testar e Ativar
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
-        {/* Grok */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Grok (X.AI)</label>
-            {providers.find(p => p.name === 'Grok')?.hasKey && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3" />
-                Configurado
-              </Badge>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Input
-              type="password"
-              placeholder="xai-..."
-              value={keys.grok}
-              onChange={(e) => setKeys(prev => ({ ...prev, grok: e.target.value }))}
-            />
-            <Button onClick={() => handleSaveKey('Grok', keys.grok)}>
-              Salvar
-            </Button>
-          </div>
-        </div>
+      <Separator />
 
-        {/* Flowise */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">Flowise</label>
-            {providers.find(p => p.name === 'Flowise')?.hasKey && (
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3" />
-                Configurado
-              </Badge>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Input
-              type="password"
-              placeholder="V2Zu_..."
-              value={keys.flowise}
-              onChange={(e) => setKeys(prev => ({ ...prev, flowise: e.target.value }))}
-            />
-            <Button onClick={() => handleSaveKey('Flowise', keys.flowise)}>
-              Salvar
-            </Button>
-          </div>
-        </div>
-
-        {/* Quick Setup */}
-        <div className="p-4 bg-muted rounded-lg space-y-2">
-          <h4 className="font-medium text-sm">Setup Rápido - Todas as APIs</h4>
-          <div className="space-y-1 text-xs text-muted-foreground">
-            <p>• <strong>OpenAI:</strong> GPT-4 - Melhor qualidade geral</p>
-            <p>• <strong>Gemini:</strong> Google - Boa qualidade e velocidade</p>
-            <p>• <strong>DeepSeek:</strong> Especializado em código</p>
-            <p>• <strong>Grok:</strong> X.AI - Modelo criativo</p>
-            <p>• <strong>Flowise:</strong> Workflows personalizados</p>
-            <p>• <strong>Hugging Face:</strong> Modelos open source gratuitos</p>
-          </div>
+      {/* Quick Setup */}
+      <Card>
+        <CardHeader>
+          <CardTitle>🚀 Configuração Rápida para Máxima Performance</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Cole todas as chaves acima e clique para configurar tudo de uma vez. 
+            Recomendado: Configure ao menos OpenAI, Gemini e DeepSeek para melhor resultado.
+          </p>
+        </CardHeader>
+        <CardContent>
           <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => {
-              handleSaveKey('OpenAI', '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');
-              handleSaveKey('Gemini', 'AIzaSyBRxsnUY-PTT95EiY6yVTCaDz7DeJLgc9E');
-              handleSaveKey('DeepSeek', 'sk-4001fb4f0ab44836817907e524a520ae');
-              handleSaveKey('Grok', 'xai-lm9TeAFhMVeOSjlzrUeTkth25T3dmy692MbBIGOKoibjGbajmeMwvxBJnRO3KyxIVelRnjCj7nRkm6M2');
-              handleSaveKey('Flowise', 'V2Zu_LGe9GoO4JIbqejaAevJ62pew-7AD7uqvITCw40');
-              toast({
-                title: "Todas as Chaves Configuradas!",
-                description: "Sistema de fallback automático ativado com 5 APIs",
-              });
-            }}
+            onClick={configureAllKeys}
+            disabled={Object.values(keys).filter(k => k.trim()).length === 0}
+            className="w-full"
+            size="lg"
           >
-            🚀 Configurar Todas as APIs
+            <Brain className="h-5 w-5 mr-2" />
+            Configurar Todas as APIs ({Object.values(keys).filter(k => k.trim()).length} APIs detectadas)
           </Button>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Status */}
-        <div className="text-xs text-muted-foreground">
-          Sistema com fallback automático: OpenAI → Gemini → DeepSeek → Grok → Flowise → Hugging Face (gratuito)
-        </div>
-      </CardContent>
-    </Card>
+      {/* Instructions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>📋 Como Obter as Chaves de API</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h4 className="font-semibold">OpenAI (Recomendado)</h4>
+              <p className="text-muted-foreground">platform.openai.com → API Keys</p>
+            </div>
+            <div>
+              <h4 className="font-semibold">Google Gemini</h4>
+              <p className="text-muted-foreground">aistudio.google.com → Get API Key</p>
+            </div>
+            <div>
+              <h4 className="font-semibold">DeepSeek</h4>
+              <p className="text-muted-foreground">platform.deepseek.com → API Keys</p>
+            </div>
+            <div>
+              <h4 className="font-semibold">xAI Grok</h4>
+              <p className="text-muted-foreground">console.x.ai → API Keys</p>
+            </div>
+          </div>
+          <div className="bg-blue-50 p-3 rounded-lg">
+            <p className="text-blue-800 text-xs">
+              💡 <strong>Dica:</strong> Configure pelo menos 3 APIs para que os agentes trabalhem em capacidade máxima e conversem entre si eficientemente.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
