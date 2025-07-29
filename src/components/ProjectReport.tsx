@@ -81,13 +81,14 @@ export const ProjectReport = ({ project, agents }: ProjectReportProps) => {
 
     try {
       const zipBlob = await fileGeneratorService.generateProjectZip(project, generatedFiles);
-      fileGeneratorService.downloadZip(zipBlob, project.name);
+      fileGeneratorService.downloadZip(zipBlob, `${project.name}_generated`);
       
       toast({
         title: "📦 Download Iniciado",
-        description: `${project.name}.zip baixado com sucesso!`,
+        description: `${project.name}_generated.zip baixado com sucesso!`,
       });
     } catch (error) {
+      console.error('Erro no download:', error);
       toast({
         title: "Erro no Download",
         description: "Não foi possível gerar o ZIP",
