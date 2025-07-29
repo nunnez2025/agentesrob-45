@@ -37,31 +37,54 @@ export const ProjectReport = ({ project, agents }: ProjectReportProps) => {
   const generateProjectFiles = async () => {
     setGeneratingFiles(true);
     setProgress(0);
-    const allFiles: ProjectFile[] = [];
+    setGeneratedFiles([]);
 
     try {
+      toast({
+        title: "🤖 Iniciando Geração",
+        description: "Os agentes estão trabalhando no seu projeto...",
+      });
+
+      const allFiles: ProjectFile[] = [];
+      
       for (let i = 0; i < agents.length; i++) {
         const agent = agents[i];
+        const progressValue = ((i + 1) / agents.length) * 100;
+        setProgress(progressValue);
+        
         toast({
-          title: `Gerando arquivos: ${agent.name}`,
-          description: `${agent.role} está criando os deliverables...`,
+          title: `${agent.name} trabalhando`,
+          description: `Gerando arquivos para ${agent.role}...`,
         });
 
-        const files = await fileGeneratorService.generateFilesForAgent(agent, project);
-        allFiles.push(...files);
-        
-        setProgress(((i + 1) / agents.length) * 100);
-        setGeneratedFiles([...allFiles]);
+        try {
+          console.log(`Generating files for agent: ${agent.name} (${agent.role})`);
+          const files = await fileGeneratorService.generateFilesForAgent(agent, project);
+          console.log(`Generated ${files.length} files for ${agent.name}`);
+          allFiles.push(...files);
+          setGeneratedFiles([...allFiles]);
+        } catch (error) {
+          console.error(`Error generating files for ${agent.name}:`, error);
+          toast({
+            title: `Aviso - ${agent.name}`,
+            description: "Alguns arquivos podem não ter sido gerados",
+            variant: "destructive"
+          });
+        }
+
+        // Small delay to show progress
+        await new Promise(resolve => setTimeout(resolve, 300));
       }
 
       toast({
-        title: "✅ Geração Completa!",
-        description: `${allFiles.length} arquivos criados por ${agents.length} agentes`,
+        title: "✅ Geração Concluída",
+        description: `${allFiles.length} arquivos criados com sucesso! Agora você pode baixar o projeto.`,
       });
     } catch (error) {
+      console.error('Error in generateProjectFiles:', error);
       toast({
         title: "Erro na Geração",
-        description: "Alguns arquivos podem não ter sido criados",
+        description: "Tente novamente ou configure uma chave de API para melhores resultados.",
         variant: "destructive"
       });
     } finally {
