@@ -30,7 +30,7 @@ All colors MUST be HSL.
     --accent-foreground: 0 0% 98%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive-foreground: 0 0% 98%;
 
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
@@ -52,7 +52,7 @@ All colors MUST be HSL.
     --agent-manager: 0 84% 60%;
 
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(142 86% 28%));
-    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(210 40% 90%));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(240 5.9% 10%));
     --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(142 86% 28%));
     
     --shadow-glow: 0 0 20px hsl(var(--primary) / 0.3);

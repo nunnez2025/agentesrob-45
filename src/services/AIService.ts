@@ -145,18 +145,6 @@ class AIService {
   }
 
   public async generateResponse(prompt: string, agentRole: string): Promise<AIResponse> {
-    // First check if any API keys are configured
-    const hasAnyApiKey = this.providers.some(provider => this.getApiKey(provider.name));
-    
-    if (!hasAnyApiKey) {
-      // No API keys configured, use direct mock response
-      return {
-        success: true,
-        content: this.generateMockResponse(prompt, agentRole),
-        provider: 'Mock System'
-      };
-    }
-
     // Try providers in order: OpenAI -> Gemini -> Public APIs -> Hugging Face
     for (const provider of this.providers) {
       const apiKey = this.getApiKey(provider.name);
@@ -173,12 +161,18 @@ class AIService {
       }
     }
 
-    // Ultimate fallback to mock response
-    return {
-      success: true,
-      content: this.generateMockResponse(prompt, agentRole),
-      provider: 'Mock System'
-    };
+    // Try public APIs
+    try {
+      const publicResponse = await this.tryPublicAPIs(prompt, agentRole);
+      if (publicResponse.success) {
+        return publicResponse;
+      }
+    } catch (error) {
+      console.warn('Public APIs failed:', error);
+    }
+
+    // Fallback to Hugging Face (free)
+    return await this.callHuggingFace(prompt, agentRole);
   }
 
   private async callProvider(provider: AIProvider, prompt: string, role: string, apiKey: string): Promise<AIResponse> {
@@ -302,259 +296,27 @@ class AIService {
     return { success: false, content: '', provider: 'None' };
   }
 
-  private generateMockResponse(prompt: string, role: string): string {
-    const codeTemplates = {
-      'developer': `// ${prompt.includes('README') ? 'README.md' : 'App.tsx'}
-${prompt.includes('README') ? 
-`# Projeto Desenvolvido
-
-## Descrição
-Este projeto foi desenvolvido com React, TypeScript e Vite.
-
-## Instalação
-\`\`\`bash
-npm install
-npm run dev
-\`\`\`
-
-## Estrutura
-- src/components/ - Componentes React
-- src/hooks/ - Custom hooks
-- src/types/ - Definições de tipos
-- src/services/ - Serviços da aplicação
-
-## Tecnologias
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-` :
-`import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-
-export const App: React.FC = () => {
-  return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle>Aplicação Funcional</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Esta é uma aplicação React funcional criada pelos agentes.</p>
-            <Button className="mt-4">
-              Botão de Exemplo
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-};
-
-export default App;`}`,
-      'frontend-dev': `// components/UserInterface.tsx
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-
-interface UserInterfaceProps {
-  title: string;
-}
-
-export const UserInterface: React.FC<UserInterfaceProps> = ({ title }) => {
-  const [inputValue, setInputValue] = useState('');
-
-  return (
-    <Card className="w-full max-w-md">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Input
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Digite algo..."
-        />
-        <Button className="w-full">
-          Processar
-        </Button>
-      </CardContent>
-    </Card>
-  );
-};`,
-      'designer': `/* styles/theme.css */
-:root {
-  --primary: 220 90% 56%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 220 14.3% 95.9%;
-  --secondary-foreground: 220 8.9% 46.1%;
-  --accent: 220 14.3% 95.9%;
-  --accent-foreground: 220 8.9% 46.1%;
-  --background: 0 0% 100%;
-  --foreground: 220 8.9% 46.1%;
-  --muted: 220 14.3% 95.9%;
-  --muted-foreground: 220 8.9% 46.1%;
-  --border: 220 13% 91%;
-  --card: 0 0% 100%;
-  --card-foreground: 220 8.9% 46.1%;
-}
-
-.theme-modern {
-  @apply bg-gradient-to-br from-blue-50 to-indigo-100;
-}
-
-.component-card {
-  @apply bg-white/80 backdrop-blur-sm border border-white/20 shadow-lg rounded-xl;
-}
-
-.button-primary {
-  @apply bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium px-6 py-2 rounded-lg transition-all duration-200;
-}`,
-      'backend-dev': `// server/api.js
-const express = require('express');
-const cors = require('cors');
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
-});
-
-// API endpoints
-app.get('/api/data', (req, res) => {
-  res.json({
-    message: 'API funcionando',
-    data: [
-      { id: 1, name: 'Item 1' },
-      { id: 2, name: 'Item 2' }
-    ]
-  });
-});
-
-app.post('/api/data', (req, res) => {
-  const { name } = req.body;
-  res.json({
-    message: 'Dados recebidos',
-    id: Date.now(),
-    name
-  });
-});
-
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(\`Servidor rodando na porta \${PORT}\`);
-});`,
-      'qa-engineer': `// tests/App.test.tsx
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
-import App from '../App';
-
-describe('App Component', () => {
-  it('renders main content', () => {
-    render(<App />);
-    expect(screen.getByText('Aplicação Funcional')).toBeInTheDocument();
-  });
-
-  it('handles button click', () => {
-    render(<App />);
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-    expect(button).toBeInTheDocument();
-  });
-
-  it('has responsive design', () => {
-    render(<App />);
-    const container = screen.getByRole('main') || document.querySelector('.min-h-screen');
-    expect(container).toHaveClass('min-h-screen');
-  });
-});`
-    };
-
-    return codeTemplates[role as keyof typeof codeTemplates] || this.generateFallbackResponse(prompt, role);
-  }
-
   private generateFallbackResponse(prompt: string, role: string): string {
     const responses = {
-      'product-manager': `# Documento de Requisitos do Produto (PRD)
-
-## Visão Geral
-${prompt.includes('projeto') ? 'Este projeto visa criar uma solução inovadora que atenda às necessidades dos usuários.' : 'Funcionalidade analisada e aprovada para desenvolvimento.'}
-
-## Objetivos
-- Entregar valor aos usuários
-- Manter alta qualidade
-- Garantir escalabilidade
-
-## Requisitos Funcionais
-1. Interface intuitiva
-2. Performance otimizada
-3. Segurança implementada
-
-## Cronograma
-- Fase 1: Planejamento (1 semana)
-- Fase 2: Desenvolvimento (2-3 semanas)
-- Fase 3: Testes e Deploy (1 semana)`,
-      
-      'copywriter': `# Conteúdo do Projeto
-
-## Título Principal
-Solução Inovadora para suas Necessidades
-
-## Descrição
-Uma aplicação moderna e eficiente que resolve problemas reais dos usuários.
-
-## Benefícios
-- ✅ Fácil de usar
-- ✅ Interface moderna
-- ✅ Performance otimizada
-- ✅ Suporte completo
-
-## Call to Action
-Experimente agora e transforme sua experiência!`,
-
-      'system-analyst': `# Análise de Sistema
-
-## Arquitetura
-- Frontend: React + TypeScript
-- Backend: Node.js + Express
-- Banco de dados: PostgreSQL
-- Deploy: Vercel/Netlify
-
-## Fluxo de Dados
-1. Interface do usuário
-2. Processamento no frontend
-3. API calls para backend
-4. Persistência de dados
-
-## Segurança
-- Autenticação JWT
-- Validação de entrada
-- HTTPS obrigatório
-- Rate limiting`
+      'product-manager': [
+        'Analisando os requisitos do projeto. Vou coordenar com a equipe para implementar essa funcionalidade.',
+        'Ótima solicitação! Isso se alinha com os objetivos do produto. Priorizando para o próximo sprint.',
+        'Entendido. Vou atualizar o roadmap e comunicar as mudanças para todos os stakeholders.'
+      ],
+      'developer': [
+        'Implementando a funcionalidade solicitada. Estimativa: 2-3 horas de desenvolvimento.',
+        'Código em progresso. Utilizando as melhores práticas e padrões estabelecidos.',
+        'Desenvolvimento concluído. Iniciando testes unitários e integração.'
+      ],
+      'designer': [
+        'Criando wireframes e protótipos para a nova funcionalidade.',
+        'Design focado na experiência do usuário. Seguindo o design system estabelecido.',
+        'Prototipando interações e validando usabilidade com a equipe.'
+      ]
     };
 
-    const roleResponses = responses[role as keyof typeof responses] || 
-      `# Arquivo gerado para ${role}
-
-Este arquivo foi criado automaticamente pelo sistema de agentes.
-
-## Conteúdo
-- Implementação específica para ${role}
-- Código funcional e documentado
-- Seguindo melhores práticas
-
-## Próximos passos
-1. Revisar implementação
-2. Testar funcionalidades
-3. Integrar com sistema`;
-
-    return roleResponses;
+    const roleResponses = responses[role as keyof typeof responses] || responses['developer'];
+    return roleResponses[Math.floor(Math.random() * roleResponses.length)];
   }
 
   public getAvailableProviders(): { name: string; hasKey: boolean }[] {
