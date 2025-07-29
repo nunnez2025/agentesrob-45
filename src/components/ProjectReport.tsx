@@ -261,63 +261,39 @@ export const ProjectReport = ({ project, agents }: ProjectReportProps) => {
         </TabsContent>
 
         <TabsContent value="actions" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5" />
-                  Gerar Arquivos do Projeto
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Todos os agentes irão trabalhar simultaneamente para gerar os deliverables do projeto.
-                </p>
-                <Button 
-                  onClick={generateProjectFiles}
-                  disabled={generatingFiles}
-                  className="w-full"
-                >
-                  {generatingFiles ? (
-                    <>
-                      <Activity className="h-4 w-4 mr-2 animate-spin" />
-                      Gerando...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Iniciar Geração
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Download className="h-5 w-5" />
-                  Download do Projeto
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Baixe todos os arquivos gerados em um arquivo ZIP organizado.
-                </p>
-                <Button 
-                  onClick={downloadProjectZip}
-                  disabled={generatedFiles.length === 0}
-                  variant="outline"
-                  className="w-full"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Baixar ZIP ({generatedFiles.length} arquivos)
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          <ZipAnalyzer />
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5" />
+                Gerar e Baixar Projeto Completo
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Gere todos os arquivos do projeto organizados em pastas e baixe em formato ZIP.
+              </p>
+              <Button 
+                onClick={async () => {
+                  await generateProjectFiles();
+                  setTimeout(() => downloadProjectZip(), 1000);
+                }}
+                disabled={generatingFiles}
+                className="w-full"
+              >
+                {generatingFiles ? (
+                  <>
+                    <Activity className="h-4 w-4 mr-2 animate-spin" />
+                    Gerando e Preparando ZIP...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    Gerar e Baixar Projeto ZIP
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
