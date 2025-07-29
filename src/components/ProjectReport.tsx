@@ -20,6 +20,7 @@ import { Project, Agent } from '@/types/agent';
 import { fileGeneratorService, ProjectFile } from '@/services/FileGeneratorService';
 import { useToast } from '@/hooks/use-toast';
 import hackerJokerImage from '@/assets/hacker-joker.jpg';
+import { ZipAnalyzer } from './ZipAnalyzer';
 
 interface ProjectReportProps {
   project: Project;
@@ -260,95 +261,7 @@ export const ProjectReport = ({ project, agents }: ProjectReportProps) => {
         </TabsContent>
 
         <TabsContent value="actions" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5" />
-                  Gerar Arquivos do Projeto
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Todos os agentes irão trabalhar simultaneamente para gerar os deliverables do projeto.
-                </p>
-                <Button 
-                  onClick={generateProjectFiles}
-                  disabled={generatingFiles}
-                  className="w-full"
-                >
-                  {generatingFiles ? (
-                    <>
-                      <Activity className="h-4 w-4 mr-2 animate-spin" />
-                      Gerando...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      Iniciar Geração
-                    </>
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Download className="h-5 w-5" />
-                  Download do Projeto
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Baixe todos os arquivos gerados em um arquivo ZIP organizado.
-                </p>
-                <Button 
-                  onClick={downloadProjectZip}
-                  disabled={generatedFiles.length === 0}
-                  variant="outline"
-                  className="w-full"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Baixar ZIP ({generatedFiles.length} arquivos)
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>APIs e Fallback System</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>OpenAI GPT-4 (Principal)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Google Gemini (Backup 1)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>DeepSeek Coder (Backup 2)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Grok X.AI (Backup 3)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Flowise (Backup 4)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-blue-500" />
-                  <span>Hugging Face (Gratuito - Sempre disponível)</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <ZipAnalyzer />
         </TabsContent>
       </Tabs>
     </div>

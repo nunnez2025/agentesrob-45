@@ -155,57 +155,32 @@ const Index = () => {
       </div>
 
       <div className="max-w-7xl mx-auto p-6">
-        <Tabs defaultValue="report" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
-            <TabsTrigger value="report" className="flex items-center gap-2">
-              📊 Painel Principal
-            </TabsTrigger>
-            <TabsTrigger value="chat" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Chat IA
-            </TabsTrigger>
-            <TabsTrigger value="agents" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Agentes
-            </TabsTrigger>
-            <TabsTrigger value="ai-setup" className="flex items-center gap-2">
-              <Bot className="h-4 w-4" />
-              APIs IA
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="agents" className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {agents.map((agent) => (
-                <AgentCard
-                  key={agent.id}
-                  agent={agent}
-                  isActive={selectedAgent === agent.id}
-                  onClick={() => setSelectedAgent(agent.id)}
-                />
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="report" className="mt-0">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Painel Principal com Relatório */}
+          <div className="lg:col-span-1">
             <ProjectReport project={project} agents={agents} />
-          </TabsContent>
+          </div>
 
-          <TabsContent value="chat" className="mt-0">
-            <div className="h-[600px]">
-              <ChatInterface
-                messages={messages}
-                agents={agents}
-                onSendMessage={sendMessage}
-                isLoading={isProcessing}
-              />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="ai-setup" className="mt-0">
-            <AIKeySetup />
-          </TabsContent>
-        </Tabs>
+          {/* Chat dos Agentes */}
+          <div className="lg:col-span-1">
+            <Card className="h-[800px] flex flex-col">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  Chat dos Agentes
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1 p-0">
+                <ChatInterface
+                  messages={messages}
+                  agents={agents}
+                  onSendMessage={sendMessage}
+                  isLoading={isProcessing}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
