@@ -14,13 +14,15 @@ import {
   AlertCircle,
   BarChart3,
   Activity,
-  Zap
+  Zap,
+  MessageSquare
 } from 'lucide-react';
 import { Project, Agent } from '@/types/agent';
 import { fileGeneratorService, ProjectFile } from '@/services/FileGeneratorService';
 import { useToast } from '@/hooks/use-toast';
 import hackerJokerImage from '@/assets/hacker-joker.jpg';
 import { ZipAnalyzer } from './ZipAnalyzer';
+import { ChatInterface } from './ChatInterface';
 
 interface ProjectReportProps {
   project: Project;
@@ -233,31 +235,42 @@ export const ProjectReport = ({ project, agents }: ProjectReportProps) => {
         </TabsContent>
 
         <TabsContent value="files" className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            {Object.entries(fileStats).map(([type, count]) => (
-              <Card key={type}>
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold">{count}</div>
-                  <p className="text-sm text-muted-foreground capitalize">{type}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {/* Chat dos Agentes */}
+          <Card className="h-[500px] flex flex-col">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                Chat com os Agentes
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 p-0">
+              <ChatInterface
+                messages={[]}
+                agents={agents}
+                onSendMessage={() => {}}
+                isLoading={false}
+              />
+            </CardContent>
+          </Card>
 
-          <div className="space-y-2">
-            {generatedFiles.map((file, idx) => (
-              <div key={idx} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <Code className="h-4 w-4" />
-                  <div>
-                    <p className="font-medium">{file.name}</p>
-                    <p className="text-sm text-muted-foreground">{file.path}</p>
-                  </div>
-                </div>
-                <Badge variant="outline">{file.type}</Badge>
+          {/* Monitor do Projeto */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                Monitor do Projeto
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="aspect-video bg-slate-900 rounded-lg flex items-center justify-center">
+                <iframe
+                  src="data:text/html,<html><body style='margin:0;padding:20px;font-family:Arial;background:linear-gradient(135deg,%23667eea,%23764ba2);color:white;text-align:center'><h1>🚀 Projeto Finalizado</h1><p>Preview do projeto funcionando</p><div style='margin-top:50px;font-size:48px'>✅</div></body></html>"
+                  className="w-full h-full rounded-lg border-0"
+                  title="Projeto Funcionando"
+                />
               </div>
-            ))}
-          </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="actions" className="space-y-4">
