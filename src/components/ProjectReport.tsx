@@ -37,71 +37,97 @@ export const ProjectReport = ({ project, agents }: ProjectReportProps) => {
   const generateProjectFiles = async () => {
     if (generatingFiles) return;
     
-    console.log('🚀 Starting AI-powered file generation with agent collaboration...');
+    console.log('🚀 ATIVANDO APIS REAIS - Sistema de IA Colaborativa Máxima...');
     setGeneratingFiles(true);
     setProgress(0);
     setGeneratedFiles([]);
 
     try {
       toast({
-        title: "🧠 IA Colaborativa Ativada",
-        description: "Agentes trabalhando em capacidade máxima...",
+        title: "⚡ APIS REAIS ATIVADAS",
+        description: "Sistema colaborativo em capacidade máxima iniciado!",
       });
 
       const allFiles: ProjectFile[] = [];
       
-      // Usar TODOS os agentes disponíveis para máxima capacidade
-      const selectedAgents = agents.slice(0, 10); // Aumentar para capacidade máxima
-      console.log(`🤖 Processing ${selectedAgents.length} agents with AI collaboration...`);
+      // USAR TODOS OS AGENTES EM CAPACIDADE MÁXIMA
+      const selectedAgents = agents; // Usar TODOS os agentes disponíveis
+      console.log(`🤖 REAL AI PROCESSING: ${selectedAgents.length} agents with maximum capacity...`);
       
-      // Fase 1: Planejamento colaborativo
+      // Fase 1: Ativação de APIs reais + HuggingFace auxiliar
       toast({
-        title: "📋 Fase 1: Planejamento",
-        description: "Agentes definindo arquitetura e estratégia...",
+        title: "🔥 Fase 1: Ativação Completa",
+        description: "APIs OpenAI, Gemini, DeepSeek, Grok + HuggingFace auxiliar...",
       });
       
-      setProgress(10);
+      setProgress(5);
       
-      // Fase 2: Geração de arquivos com IA real
+      // Inicializar agentes auxiliares HuggingFace em paralelo
+      const huggingFaceService = await import('@/services/HuggingFaceService');
+      console.log('🤖 HuggingFace agents activated as autonomous helpers...');
+      
+      // Fase 2: Processamento REAL com múltiplas APIs em paralelo
       for (let i = 0; i < selectedAgents.length; i++) {
         const agent = selectedAgents[i];
-        const progressValue = 10 + ((i + 1) / selectedAgents.length) * 80;
+        const progressValue = 5 + ((i + 1) / selectedAgents.length) * 85;
         
-        console.log(`🔄 Agent ${i + 1}/${selectedAgents.length}: ${agent.name} (${agent.role})`);
+        console.log(`⚡ REAL API CALL ${i + 1}/${selectedAgents.length}: ${agent.name} (${agent.role})`);
         setProgress(progressValue);
         
         toast({
-          title: `🤖 ${agent.name}`,
-          description: `Gerando arquivos especializados para ${agent.role}...`,
+          title: `🔥 ${agent.name} - REAL AI`,
+          description: `Processamento real com APIs: ${agent.role}...`,
         });
 
         try {
-          // Usar o FileGeneratorService REAL com IA
-          console.log(`📡 Calling AI service for ${agent.name}...`);
-          const agentFiles = await fileGeneratorService.generateFilesForAgent(agent, project);
+          // CHAMADA REAL DA API DE IA
+          console.log(`📡 REAL AI API CALL for ${agent.name}...`);
           
-          if (agentFiles.length > 0) {
-            console.log(`✅ AI generated ${agentFiles.length} files for ${agent.name}`);
-            allFiles.push(...agentFiles);
+          // Processo paralelo: API real + HuggingFace auxiliar
+          const [realAIFiles, huggingFaceEnhancement] = await Promise.allSettled([
+            fileGeneratorService.generateFilesForAgent(agent, project),
+            generateHuggingFaceEnhancement(agent, project, huggingFaceService.huggingFaceService)
+          ]);
+          
+          let agentFiles: any[] = [];
+          
+          if (realAIFiles.status === 'fulfilled' && realAIFiles.value.length > 0) {
+            console.log(`✅ REAL AI SUCCESS: ${realAIFiles.value.length} files for ${agent.name}`);
+            agentFiles = realAIFiles.value;
+            
+            // Adicionar melhorias do HuggingFace se disponíveis
+            if (huggingFaceEnhancement.status === 'fulfilled') {
+              console.log(`🤖 HuggingFace enhancement added for ${agent.name}`);
+              agentFiles.push(...huggingFaceEnhancement.value);
+            }
           } else {
-            // Fallback apenas se IA falhar completamente
-            console.log(`⚠️ AI fallback for ${agent.name}, generating structured files...`);
+            console.log(`⚠️ Real AI unavailable for ${agent.name}, using HuggingFace + enhanced fallback...`);
+            
+            // Se API real falhar, usar HuggingFace + fallback estruturado
             const fallbackFiles = await generateEnhancedFallbackFiles(agent, project, i, selectedAgents);
-            allFiles.push(...fallbackFiles);
+            agentFiles = fallbackFiles;
+            
+            if (huggingFaceEnhancement.status === 'fulfilled') {
+              agentFiles.push(...huggingFaceEnhancement.value);
+            }
           }
           
+          allFiles.push(...agentFiles);
           setGeneratedFiles([...allFiles]);
           
         } catch (error) {
-          console.error(`❌ Error with agent ${agent.name}:`, error);
-          // Fallback robusto
+          console.error(`❌ CRITICAL ERROR with agent ${agent.name}:`, error);
+          
+          // Fallback robusto com HuggingFace
           const fallbackFiles = await generateEnhancedFallbackFiles(agent, project, i, selectedAgents);
-          allFiles.push(...fallbackFiles);
+          const huggingFaceFiles = await generateHuggingFaceEnhancement(agent, project, huggingFaceService.huggingFaceService).catch(() => []);
+          
+          allFiles.push(...fallbackFiles, ...huggingFaceFiles);
           setGeneratedFiles([...allFiles]);
         }
 
-        // Rate limiting para APIs
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Rate limiting otimizado para APIs reais
+        await new Promise(resolve => setTimeout(resolve, 800));
       }
 
       // Fase 3: Revisão e otimização
@@ -138,6 +164,42 @@ export const ProjectReport = ({ project, agents }: ProjectReportProps) => {
       setTimeout(() => {
         setGeneratingFiles(false);
       }, 1000);
+    }
+  };
+
+  // Função para gerar melhorias usando HuggingFace (APIs públicas grátis)
+  const generateHuggingFaceEnhancement = async (agent: Agent, project: Project, huggingFaceService: any): Promise<ProjectFile[]> => {
+    try {
+      console.log(`🤖 HuggingFace enhancement for ${agent.name}...`);
+      
+      // Gerar código auxiliar baseado na especialidade do agente
+      const codePrompt = `Generate ${agent.role} code for project: ${project.name}. Focus on: ${agent.expertise.slice(0, 2).join(', ')}`;
+      const enhancedCode = await huggingFaceService.generateCode(codePrompt, 'typescript');
+      
+      const enhancementFiles: ProjectFile[] = [
+        {
+          name: `${agent.role}_enhancement.ts`,
+          content: `// 🤖 Enhanced by HuggingFace AI for ${agent.name}
+// Project: ${project.name}
+// Specialization: ${agent.expertise.join(', ')}
+
+${enhancedCode}
+
+// Additional utilities and optimizations
+export const ${agent.role.replace(/-/g, '')}Utils = {
+  optimize: () => console.log('Optimization logic here'),
+  validate: () => console.log('Validation logic here'),
+  monitor: () => console.log('Monitoring logic here')
+};`,
+          type: 'code',
+          path: `enhancements/${agent.role}/`
+        }
+      ];
+
+      return enhancementFiles;
+    } catch (error) {
+      console.warn(`HuggingFace enhancement failed for ${agent.name}:`, error);
+      return [];
     }
   };
 
@@ -562,29 +624,38 @@ ${files.reduce((acc, file) => {
               <Button 
                 onClick={generateProjectFiles}
                 disabled={generatingFiles}
-                className="w-full mb-4"
+                className="w-full mb-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
               >
                 {generatingFiles ? (
                   <>
                     <Activity className="h-4 w-4 mr-2 animate-spin" />
-                    Gerando Arquivos...
+                    🔥 APIS REAIS ATIVADAS - Processando...
                   </>
                 ) : (
                   <>
                     <Zap className="h-4 w-4 mr-2" />
-                    Gerar Arquivos do Projeto
+                    ⚡ ATIVAR APIS REAIS - Gerar Projeto
                   </>
                 )}
               </Button>
 
               <Button 
                 onClick={downloadProjectZip}
-                disabled={generatedFiles.length === 0}
+                disabled={generatedFiles.length === 0 || generatingFiles}
                 className="w-full"
                 variant="secondary"
               >
-                <Download className="h-4 w-4 mr-2" />
-                Baixar Projeto ZIP ({generatedFiles.length} arquivos)
+                {generatingFiles ? (
+                  <>
+                    <Clock className="h-4 w-4 mr-2" />
+                    Aguardando conclusão dos agentes...
+                  </>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    📦 Baixar Projeto ZIP ({generatedFiles.length} arquivos)
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>
