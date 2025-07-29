@@ -293,26 +293,31 @@ export const ProjectReport = ({ project, agents }: ProjectReportProps) => {
                 Gere todos os arquivos do projeto organizados em pastas e baixe em formato ZIP.
               </p>
               <Button 
-                onClick={async () => {
-                  await generateProjectFiles();
-                  if (generatedFiles.length > 0) {
-                    await downloadProjectZip();
-                  }
-                }}
+                onClick={generateProjectFiles}
                 disabled={generatingFiles}
-                className="w-full"
+                className="w-full mb-4"
               >
                 {generatingFiles ? (
                   <>
                     <Activity className="h-4 w-4 mr-2 animate-spin" />
-                    Gerando e Preparando ZIP...
+                    Gerando Arquivos...
                   </>
                 ) : (
                   <>
-                    <Download className="h-4 w-4 mr-2" />
-                    Gerar e Baixar Projeto ZIP
+                    <Zap className="h-4 w-4 mr-2" />
+                    Gerar Arquivos do Projeto
                   </>
                 )}
+              </Button>
+
+              <Button 
+                onClick={downloadProjectZip}
+                disabled={generatedFiles.length === 0}
+                className="w-full"
+                variant="secondary"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Baixar Projeto ZIP ({generatedFiles.length} arquivos)
               </Button>
             </CardContent>
           </Card>
