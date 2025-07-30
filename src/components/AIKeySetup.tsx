@@ -84,20 +84,23 @@ export const AIKeySetup = () => {
     setTesting(prev => ({ ...prev, [provider]: true }));
     
     try {
-      // Para demonstração, todas as chaves são aceitas como válidas
-      // mas você deve usar suas chaves reais de API
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simula teste
+      // Test real API call
+      const testResponse = await aiService.testApiKey(provider, key);
       
-      aiService.setApiKey(provider, key);
-      toast({
-        title: "✅ API Configurada",
-        description: `${provider} ativado! (Modo demonstração - use chaves reais para produção)`,
-      });
+      if (testResponse.success) {
+        aiService.setApiKey(provider, key);
+        toast({
+          title: "✅ API Real Ativada",
+          description: `${provider} conectado e funcionando com capacidade máxima!`,
+        });
+      } else {
+        throw new Error(testResponse.error || 'Chave de API inválida');
+      }
     } catch (error) {
-      console.error(`API test failed for ${provider}:`, error);
+      console.error(`Real API test failed for ${provider}:`, error);
       toast({
-        title: "❌ Erro na API",
-        description: `Falha ao testar ${provider}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
+        title: "❌ Chave de API Inválida",
+        description: `${provider}: ${error instanceof Error ? error.message : 'Verifique sua chave de API'}`,
         variant: "destructive"
       });
     } finally {

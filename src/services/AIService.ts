@@ -66,7 +66,7 @@ class AIService {
         'Content-Type': 'application/json',
       }),
       formatRequest: (prompt: string, role: string) => ({
-        model: 'deepseek-coder',
+        model: 'deepseek-chat',
         messages: [
           {
             role: 'system',
@@ -131,7 +131,7 @@ class AIService {
         'anthropic-version': '2023-06-01'
       }),
       formatRequest: (prompt: string, role: string) => ({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-3-5-sonnet-20241022',
         max_tokens: 2000,
         temperature: 0.7,
         messages: [
