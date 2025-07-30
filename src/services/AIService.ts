@@ -23,7 +23,7 @@ class AIService {
         'Content-Type': 'application/json',
       }),
       formatRequest: (prompt: string, role: string) => ({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -41,7 +41,7 @@ class AIService {
     },
     {
       name: 'Gemini',
-      endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent',
+      endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
       headers: (apiKey: string) => ({
         'Content-Type': 'application/json',
       }),
