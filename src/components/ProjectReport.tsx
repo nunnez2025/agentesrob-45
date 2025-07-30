@@ -545,11 +545,11 @@ ${files.reduce((acc, file) => {
       </Card>
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-          <TabsTrigger value="agents">Agentes</TabsTrigger>
-          <TabsTrigger value="files">Arquivos</TabsTrigger>
-          <TabsTrigger value="actions">Ações</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+          <TabsTrigger value="overview" className="text-xs sm:text-sm p-2 sm:p-3">Visão Geral</TabsTrigger>
+          <TabsTrigger value="agents" className="text-xs sm:text-sm p-2 sm:p-3">Agentes</TabsTrigger>
+          <TabsTrigger value="files" className="text-xs sm:text-sm p-2 sm:p-3">Arquivos</TabsTrigger>
+          <TabsTrigger value="actions" className="text-xs sm:text-sm p-2 sm:p-3">Ações</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -735,17 +735,17 @@ ${files.reduce((acc, file) => {
               <Button 
                 onClick={generateProjectFiles}
                 disabled={generatingFiles}
-                className="w-full mb-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+                className="w-full mb-4 h-12 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium transition-all duration-200 touch-manipulation disabled:opacity-50"
               >
                 {generatingFiles ? (
                   <>
-                    <Activity className="h-4 w-4 mr-2 animate-spin" />
-                    🔥 APIS REAIS ATIVADAS - Processando...
+                    <Activity className="h-4 w-4 mr-2 animate-spin flex-shrink-0" />
+                    <span className="truncate">🔥 APIS REAIS ATIVADAS - Processando...</span>
                   </>
                 ) : (
                   <>
-                    <Zap className="h-4 w-4 mr-2" />
-                    ⚡ ATIVAR APIS REAIS - Gerar Projeto
+                    <Zap className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">⚡ ATIVAR APIS REAIS - Gerar Projeto</span>
                   </>
                 )}
               </Button>
@@ -753,18 +753,18 @@ ${files.reduce((acc, file) => {
               <Button 
                 onClick={downloadProjectZip}
                 disabled={generatedFiles.length === 0 || generatingFiles}
-                className="w-full"
+                className="w-full h-12 font-medium transition-all duration-200 touch-manipulation disabled:opacity-50"
                 variant="secondary"
               >
                 {generatingFiles ? (
                   <>
-                    <Clock className="h-4 w-4 mr-2" />
-                    Aguardando conclusão dos agentes...
+                    <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">Aguardando conclusão dos agentes...</span>
                   </>
                 ) : (
                   <>
-                    <Download className="h-4 w-4 mr-2" />
-                    📦 Baixar Projeto ZIP ({generatedFiles.length} arquivos)
+                    <Download className="h-4 w-4 mr-2 flex-shrink-0" />
+                    <span className="truncate">📦 Baixar Projeto ZIP ({generatedFiles.length} arquivos)</span>
                   </>
                 )}
               </Button>

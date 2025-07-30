@@ -51,15 +51,15 @@ const Index = () => {
             </p>
           </div>
 
-          <Tabs defaultValue="project" className="max-w-4xl mx-auto mb-8">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="project">
-                <Plus className="mr-2 h-4 w-4" />
-                Criar Projeto
+          <Tabs defaultValue="project" className="w-full max-w-4xl mx-auto mb-8">
+            <TabsList className="grid w-full grid-cols-2 h-auto">
+              <TabsTrigger value="project" className="flex items-center gap-2 p-3 text-sm sm:text-base">
+                <Plus className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">Criar Projeto</span>
               </TabsTrigger>
-              <TabsTrigger value="setup">
-                <Settings className="mr-2 h-4 w-4" />
-                Configurar APIs IA
+              <TabsTrigger value="setup" className="flex items-center gap-2 p-3 text-sm sm:text-base">
+                <Settings className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">Configurar APIs IA</span>
               </TabsTrigger>
             </TabsList>
 
@@ -69,14 +69,14 @@ const Index = () => {
 
             <TabsContent value="project" className="mt-6">
 
-          <Card className="max-w-2xl mx-auto shadow-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5" />
+          <Card className="w-full max-w-2xl mx-auto shadow-card">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <Plus className="h-5 w-5 flex-shrink-0" />
                 Criar Novo Projeto
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 sm:p-6 pt-0">
               <form onSubmit={handleCreateProject} className="space-y-4">
                 <div>
                   <label className="text-sm font-medium mb-2 block">
@@ -85,7 +85,8 @@ const Index = () => {
                   <Input
                     value={projectName}
                     onChange={(e) => setProjectName(e.target.value)}
-                    placeholder="Ex: App de Delivery, Site Corporativo, Game Mobile..."
+                    placeholder="Ex: App de Delivery, Site Corporativo..."
+                    className="w-full"
                     required
                   />
                 </div>
@@ -99,24 +100,25 @@ const Index = () => {
                     onChange={(e) => setProjectDescription(e.target.value)}
                     placeholder="Inclua as linguagens e tecnologias desejadas (ex: HTML, CSS, JavaScript, Python, React, Node.js, Java, UX/UI, etc.) e descreva o projeto..."
                     rows={4}
+                    className="w-full resize-none"
                     required
                   />
                 </div>
                 
                 <Button 
                   type="submit" 
-                  className="w-full bg-gradient-primary hover:opacity-90"
+                  className="w-full bg-gradient-primary hover:opacity-90 h-12 text-sm sm:text-base font-medium transition-all duration-200 touch-manipulation"
                   size="lg"
                 >
                   🚀 Iniciar Projeto com Agentes
                 </Button>
               </form>
               
-              <div className="mt-8">
+              <div className="mt-6 sm:mt-8">
                 <h3 className="text-lg font-semibold mb-4">👥 Agentes Disponíveis</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {agents.slice(0, 6).map((agent) => (
-                    <div key={agent.id} className="scale-90">
+                    <div key={agent.id} className="w-full">
                       <AgentCard agent={agent} />
                     </div>
                   ))}
