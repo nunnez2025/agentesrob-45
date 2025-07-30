@@ -118,7 +118,7 @@ class FileGeneratorService {
     };
   }
 
-  // Sistema EXTREMAMENTE RESTRITIVO - UMA linguagem = UM arquivo
+  // Sistema ULTRA CRIATIVO mas RESTRITIVO em linguagem
   private getFilteredPrompts(role: AgentRole, projectName: string, description: string, analysis: {
     requestedTechnologies: string[];
     specificFiles: string[];
@@ -131,148 +131,164 @@ class FileGeneratorService {
       return [];
     }
 
-    const hyperStrictContext = `PROJETO: ${projectName}
-DESCRIÇÃO LITERAL: "${description}"
-LINGUAGEM PERMITIDA: ${analysis.requestedTechnologies[0] || 'NENHUMA'}
+    const ultraCreativeContext = `PROJETO: ${projectName}
+DESCRIÇÃO: "${description}"
+TECNOLOGIA SOLICITADA: ${analysis.requestedTechnologies[0] || 'NENHUMA'}
 
-🔒 REGRAS ABSOLUTAS:
-1. Crie APENAS 1 arquivo na linguagem especificada
-2. NÃO misture tecnologias (HTML não pode ter CSS/JS interno)
-3. NÃO adicione imports, requires ou dependências externas
-4. NÃO crie arquivos de configuração (package.json, etc.)
-5. MÁXIMO 100 linhas de código
-6. APENAS código básico da linguagem pedida`;
+🎨 SEJA ULTRA CRIATIVO E INOVADOR DENTRO DAS LIMITAÇÕES:
+1. Use TODA sua criatividade na linguagem solicitada
+2. Crie código elegante, moderno e bem estruturado
+3. Implemente as melhores práticas da linguagem
+4. Use nomenclatura criativa e comentários úteis
+5. Crie funcionalidades impressionantes dentro do escopo
+6. LIMITE ABSOLUTO: Apenas a linguagem/tecnologia pedida
+7. SEM outras tecnologias além da solicitada
+8. Máximo potencial criativo na linguagem especificada`;
 
-    const singleFilePrompts: string[] = [];
+    const creativeLimitedPrompts: string[] = [];
 
-    // SE PEDIU HTML → APENAS HTML PURO
+    // SE PEDIU HTML → HTML PURO ULTRA CRIATIVO
     if (analysis.requestedTechnologies.includes('html') && role === 'frontend-dev') {
-      singleFilePrompts.push(`${hyperStrictContext}
+      creativeLimitedPrompts.push(`${ultraCreativeContext}
 
-TAREFA: Crie APENAS index.html com:
-- Estrutura HTML5 básica
-- SEM <style> interno
-- SEM <script> interno  
-- SEM links externos
-- APENAS tags HTML semânticas
+MISSÃO CRIATIVA: Crie um index.html ESPETACULAR com:
+- HTML5 semântico e moderno
+- Estrutura criativa e bem organizada
+- Uso inteligente de elementos HTML5 (sections, articles, aside, nav, etc.)
+- Formulários interativos se relevante
+- Meta tags otimizadas
+- Acessibilidade (ARIA, alt texts, etc.)
+- SEM CSS interno - APENAS HTML puro
+- SEM JavaScript interno
+- Use toda criatividade possível em HTML puro
+- Comentários explicativos criativos
 
-Formato exato:
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>${projectName}</title>
-</head>
-<body>
-    <!-- APENAS conteúdo HTML da descrição -->
-</body>
-</html>`);
+SEJA O MESTRE DO HTML! Crie o HTML mais impressionante e criativo possível para: ${description}`);
     }
 
-    // SE PEDIU CSS → APENAS CSS PURO
+    // SE PEDIU CSS → CSS PURO ULTRA CRIATIVO
     else if (analysis.requestedTechnologies.includes('css') && role === 'designer') {
-      singleFilePrompts.push(`${hyperStrictContext}
+      creativeLimitedPrompts.push(`${ultraCreativeContext}
 
-TAREFA: Crie APENAS styles.css com:
-- Propriedades CSS básicas
-- SEM @import externos
-- SEM JavaScript no CSS
-- SEM preprocessadores (SASS/LESS)
+MISSÃO CRIATIVA: Crie um styles.css DESLUMBRANTE com:
+- Design system completo (variáveis CSS custom properties)
+- Animações e transições elegantes
+- Layouts modernos (Grid, Flexbox)
+- Responsividade perfeita
+- Hover effects criativos
+- Gradientes e sombras artísticas
+- Tipografia harmoniosa
+- Paleta de cores profissional
+- Micro-interações em CSS puro
+- SEM frameworks externos
+- Comentários organizacionais
+- Arquitetura CSS bem estruturada
 
-Formato:
-/* Estilos para ${projectName} */
-/* APENAS seletores básicos CSS */`);
+SEJA O MESTRE DO CSS! Crie o CSS mais visual e impressionante para: ${description}`);
     }
 
-    // SE PEDIU JAVASCRIPT → APENAS JS VANILLA
+    // SE PEDIU JAVASCRIPT → JS VANILLA ULTRA CRIATIVO
     else if (analysis.requestedTechnologies.includes('javascript') && role === 'frontend-dev') {
-      singleFilePrompts.push(`${hyperStrictContext}
+      creativeLimitedPrompts.push(`${ultraCreativeContext}
 
-TAREFA: Crie APENAS script.js com:
-- JavaScript ES5/ES6 básico
+MISSÃO CRIATIVA: Crie um script.js GENIAL com:
+- JavaScript ES6+ moderno
+- Funções criativas e úteis
+- Classes bem estruturadas
+- Event listeners inteligentes
+- Manipulação DOM elegante
+- Algoritmos eficientes
+- Pattern matching criativo
+- Local Storage se apropriado
+- Validações inteligentes
+- SEM bibliotecas externas
 - SEM imports/requires
-- SEM bibliotecas externas
-- SEM DOM complexo
+- Comentários educativos
+- Código limpo e performático
 
-Formato:
-// ${projectName}
-// APENAS funções JavaScript básicas`);
+SEJA O MESTRE DO JAVASCRIPT! Crie o JS mais funcional e criativo para: ${description}`);
     }
 
-    // SE PEDIU REACT → APENAS 1 COMPONENTE
+    // SE PEDIU REACT → COMPONENTE REACT ULTRA CRIATIVO
     else if (analysis.requestedTechnologies.includes('react') && role === 'react-dev') {
-      singleFilePrompts.push(`${hyperStrictContext}
+      creativeLimitedPrompts.push(`${ultraCreativeContext}
 
-TAREFA: Crie APENAS App.jsx com:
-- 1 componente React básico
-- SEM hooks complexos (apenas useState se necessário)
-- SEM bibliotecas externas
-- SEM CSS modules
+MISSÃO CRIATIVA: Crie um App.jsx REVOLUCIONÁRIO com:
+- Componente React moderno e funcional
+- Hooks criativos (useState, useEffect, useCallback, useMemo)
+- Custom hooks se apropriado
+- Context API se necessário
+- Conditional rendering inteligente
+- Event handling sofisticado
+- State management elegante
+- Props drilling evitado
+- Performance optimizations
+- SEM bibliotecas externas (apenas React)
+- Comentários explicativos
+- Código limpo e reutilizável
 
-Formato:
-import React from 'react';
-
-function App() {
-  return (
-    <div>
-      {/* APENAS JSX da descrição */}
-    </div>
-  );
-}
-
-export default App;`);
+SEJA O MESTRE DO REACT! Crie o componente React mais funcional e elegante para: ${description}`);
     }
 
-    // SE PEDIU PYTHON → APENAS 1 SCRIPT
+    // SE PEDIU PYTHON → PYTHON ULTRA CRIATIVO
     else if (analysis.requestedTechnologies.includes('python') && role === 'python-dev') {
-      singleFilePrompts.push(`${hyperStrictContext}
+      creativeLimitedPrompts.push(`${ultraCreativeContext}
 
-TAREFA: Crie APENAS main.py com:
-- Python básico
-- SEM imports de bibliotecas externas
-- SEM frameworks (Django/Flask)
-- APENAS funções básicas
+MISSÃO CRIATIVA: Crie um main.py BRILHANTE com:
+- Python 3.8+ moderno
+- Classes bem estruturadas
+- Decorators criativos
+- List/Dict comprehensions elegantes
+- Context managers se apropriado
+- Exception handling inteligente
+- Type hints para clareza
+- Docstrings informativos
+- Algoritmos eficientes
+- Design patterns apropriados
+- SEM bibliotecas externas (apenas stdlib)
+- Código pythônico e limpo
+- Estrutura modular
 
-Formato:
-# ${projectName}
-# APENAS código Python da descrição
-
-def main():
-    # implementação básica
-    pass
-
-if __name__ == "__main__":
-    main()`);
+SEJA O MESTRE DO PYTHON! Crie o código Python mais elegante e funcional para: ${description}`);
     }
 
-    // SE PEDIU JAVA → APENAS 1 CLASSE
+    // SE PEDIU JAVA → JAVA ULTRA CRIATIVO
     else if (analysis.requestedTechnologies.includes('java') && role === 'developer') {
-      singleFilePrompts.push(`${hyperStrictContext}
+      creativeLimitedPrompts.push(`${ultraCreativeContext}
 
-TAREFA: Crie APENAS Main.java com:
-- 1 classe Java básica
-- SEM imports externos
-- SEM frameworks
-- Apenas métodos básicos`);
+MISSÃO CRIATIVA: Crie um Main.java PODEROSO com:
+- Classe Java moderna e bem estruturada
+- Design patterns criativos
+- Exception handling elegante
+- Documentação JavaDoc completa
+- Métodos utilitários inteligentes
+- Encapsulamento perfeito
+- SEM bibliotecas externas
+- Código limpo e eficiente
+
+SEJA O MESTRE DO JAVA! Crie a classe Java mais elegante para: ${description}`);
     }
 
-    // SE NENHUMA LINGUAGEM → APENAS README MÍNIMO
+    // SE NENHUMA LINGUAGEM → README ULTRA CRIATIVO
     else if (analysis.requestedTechnologies.length === 0 && role === 'product-manager') {
-      singleFilePrompts.push(`${hyperStrictContext}
+      creativeLimitedPrompts.push(`${ultraCreativeContext}
 
-TAREFA: Crie APENAS README.md com:
-- Título do projeto
-- Descrição original
-- MÁXIMO 20 linhas
-- SEM seções técnicas
+MISSÃO CRIATIVA: Crie um README.md ESPETACULAR com:
+- Título impactante
+- Descrição envolvente
+- Emojis criativos
+- Badges profissionais
+- Estrutura bem organizada
+- Seções bem definidas
+- Call-to-actions interessantes
+- Formatação markdown criativa
+- SEM informações técnicas de implementação
+- Foco na experiência do usuário
 
-Formato:
-# ${projectName}
-
-${description}`);
+SEJA O MESTRE DA DOCUMENTAÇÃO! Crie o README mais atrativo para: ${description}`);
     }
 
-    return singleFilePrompts;
+    return creativeLimitedPrompts;
   }
 
   private getRolePrompts(role: AgentRole, projectName: string, description: string): string[] {

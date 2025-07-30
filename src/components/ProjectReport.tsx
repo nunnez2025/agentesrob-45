@@ -24,7 +24,7 @@ import { Project, Agent } from '@/types/agent';
 import { fileGeneratorService, ProjectFile } from '@/services/FileGeneratorService';
 import { useToast } from '@/hooks/use-toast';
 import hackerJokerImage from '@/assets/hacker-joker.jpg';
-import { EnhancedZipAnalyzer } from './EnhancedZipAnalyzer';
+
 
 interface ProjectReportProps {
   project: Project;
@@ -545,11 +545,10 @@ ${files.reduce((acc, file) => {
       </Card>
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="agents">Agentes</TabsTrigger>
           <TabsTrigger value="files">Arquivos</TabsTrigger>
-          <TabsTrigger value="zip-analyzer">Análise ZIP</TabsTrigger>
           <TabsTrigger value="actions">Ações</TabsTrigger>
         </TabsList>
 
@@ -720,22 +719,6 @@ ${files.reduce((acc, file) => {
           </div>
         </TabsContent>
 
-        <TabsContent value="zip-analyzer" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Upload className="h-5 w-5" />
-                Análise e Edição de ZIP pelos Agentes
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Faça upload de um arquivo ZIP e deixe os agentes analisarem, modificarem e entregarem uma versão atualizada baseada na sua descrição.
-              </p>
-              <EnhancedZipAnalyzer />
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         <TabsContent value="actions" className="space-y-4">
           <Card>
