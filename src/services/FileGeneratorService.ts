@@ -9,7 +9,7 @@ export interface ProjectFile {
 }
 
 class FileGeneratorService {
-  // Analisar descrição EXATAMENTE como pedida - modo ultra-restritivo
+  // Analisar descrição EXATAMENTE como pedida - modo ULTRA-RESTRITIVO
   private analyzeProjectDescription(description: string): {
     requestedTechnologies: string[];
     specificFiles: string[];
@@ -18,26 +18,37 @@ class FileGeneratorService {
   } {
     const lowerDesc = description.toLowerCase();
     
-    // Detectar APENAS tecnologias EXPLICITAMENTE mencionadas
+    // Detectar APENAS tecnologias EXPLICITAMENTE mencionadas - sem inferências
     const techMentions = {
-      'html': ['html', '.html'],
-      'css': ['css', '.css', 'estilo', 'style'],
+      'html': ['html', 'html5', '.html'],
+      'css': ['css', 'css3', '.css'],
       'javascript': ['javascript', 'js', '.js'],
       'typescript': ['typescript', 'ts', '.ts'],
-      'react': ['react', 'jsx', '.jsx', 'tsx', '.tsx'],
-      'nodejs': ['node', 'nodejs', 'express'],
+      'react': ['react', 'reactjs', '.jsx', '.tsx'],
+      'vue': ['vue', 'vuejs', '.vue'],
+      'angular': ['angular', 'angularjs'],
+      'nodejs': ['node', 'nodejs', 'node.js'],
+      'express': ['express', 'expressjs'],
       'python': ['python', '.py'],
+      'django': ['django'],
+      'flask': ['flask'],
       'php': ['php', '.php'],
       'java': ['java', '.java'],
-      'sql': ['sql', 'mysql', 'postgres', 'database'],
+      'csharp': ['c#', 'csharp', '.cs'],
+      'sql': ['sql', 'mysql', 'postgresql', 'sqlite'],
       'mongodb': ['mongodb', 'mongo'],
-      'api': ['api', 'endpoint', 'rest'],
-      'json': ['json', '.json']
+      'api': ['api', 'rest api', 'restful'],
+      'json': ['json', '.json'],
+      'bootstrap': ['bootstrap'],
+      'tailwind': ['tailwind', 'tailwindcss'],
+      'sass': ['sass', 'scss', '.scss'],
+      'webpack': ['webpack'],
+      'vite': ['vite']
     };
 
     const requestedTechnologies: string[] = [];
     
-    // Só adicionar tecnologias EXPLICITAMENTE mencionadas
+    // REGRA ABSOLUTA: Só adicionar se estiver LITERALMENTE na descrição
     Object.entries(techMentions).forEach(([tech, keywords]) => {
       if (keywords.some(keyword => lowerDesc.includes(keyword))) {
         requestedTechnologies.push(tech);
@@ -49,33 +60,54 @@ class FileGeneratorService {
     const specificFiles = fileExtensions.map(ext => ext.toLowerCase());
 
     // Extrair requisitos EXATOS da descrição
-    const exactRequirements = description.split(/[.,;]/).map(req => req.trim()).filter(req => req.length > 0);
+    const exactRequirements = description.split(/[.,;!?]/).map(req => req.trim()).filter(req => req.length > 0);
 
-    // Mapear tecnologias para agentes permitidos
+    // Mapear APENAS para agentes das tecnologias EXPLICITAMENTE pedidas
     const allowedAgentRoles: AgentRole[] = [];
     
-    if (requestedTechnologies.includes('html') || requestedTechnologies.includes('css')) {
-      allowedAgentRoles.push('frontend-dev', 'designer');
+    // HTML PURO
+    if (requestedTechnologies.includes('html') && !requestedTechnologies.includes('react') && !requestedTechnologies.includes('vue') && !requestedTechnologies.includes('angular')) {
+      allowedAgentRoles.push('frontend-dev');
     }
-    if (requestedTechnologies.includes('javascript')) {
-      allowedAgentRoles.push('developer', 'frontend-dev');
+    
+    // CSS PURO
+    if (requestedTechnologies.includes('css') && !requestedTechnologies.includes('react')) {
+      allowedAgentRoles.push('designer');
     }
-    if (requestedTechnologies.includes('react') || requestedTechnologies.includes('typescript')) {
-      allowedAgentRoles.push('react-dev', 'developer');
+    
+    // JAVASCRIPT PURO (sem frameworks)
+    if (requestedTechnologies.includes('javascript') && !requestedTechnologies.includes('react') && !requestedTechnologies.includes('vue') && !requestedTechnologies.includes('angular')) {
+      allowedAgentRoles.push('frontend-dev');
     }
-    if (requestedTechnologies.includes('nodejs') || requestedTechnologies.includes('api')) {
-      allowedAgentRoles.push('nodejs-dev', 'backend-dev', 'api-dev');
+    
+    // REACT ESPECÍFICO
+    if (requestedTechnologies.includes('react')) {
+      allowedAgentRoles.push('react-dev');
     }
-    if (requestedTechnologies.includes('python')) {
+    
+    // NODEJS ESPECÍFICO
+    if (requestedTechnologies.includes('nodejs') || requestedTechnologies.includes('express')) {
+      allowedAgentRoles.push('nodejs-dev');
+    }
+    
+    // PYTHON ESPECÍFICO
+    if (requestedTechnologies.includes('python') || requestedTechnologies.includes('django') || requestedTechnologies.includes('flask')) {
       allowedAgentRoles.push('python-dev');
     }
+    
+    // BANCO DE DADOS ESPECÍFICO
     if (requestedTechnologies.includes('sql') || requestedTechnologies.includes('mongodb')) {
       allowedAgentRoles.push('database-dev');
     }
+    
+    // API ESPECÍFICA
+    if (requestedTechnologies.includes('api')) {
+      allowedAgentRoles.push('api-dev');
+    }
 
-    // Se nenhuma tecnologia específica foi mencionada, permitir apenas documentação
+    // Se NENHUMA tecnologia específica foi mencionada, APENAS documentação básica
     if (requestedTechnologies.length === 0) {
-      allowedAgentRoles.push('product-manager', 'copywriter');
+      allowedAgentRoles.push('product-manager');
     }
 
     return {
@@ -86,7 +118,7 @@ class FileGeneratorService {
     };
   }
 
-  // Filtrar prompts ULTRA-RESTRITIVOS baseados EXATAMENTE na descrição
+  // Filtrar prompts MEGA-RESTRITIVOS - APENAS o que foi pedido LITERALMENTE
   private getFilteredPrompts(role: AgentRole, projectName: string, description: string, analysis: {
     requestedTechnologies: string[];
     specificFiles: string[];
@@ -94,60 +126,118 @@ class FileGeneratorService {
     allowedAgentRoles: AgentRole[];
   }): string[] {
     
-    // Se o agente não está na lista permitida, retornar vazio
+    // REGRA PRIMÁRIA: Se o agente não está permitido, ZERO arquivos
     if (!analysis.allowedAgentRoles.includes(role)) {
       return [];
     }
 
-    const strictContext = `PROJETO: ${projectName}
-DESCRIÇÃO EXATA: ${description}
-TECNOLOGIAS PERMITIDAS: ${analysis.requestedTechnologies.join(', ')}
+    const ultraStrictContext = `PROJETO: ${projectName}
+DESCRIÇÃO LITERAL: ${description}
+TECNOLOGIAS EXPLÍCITAS: ${analysis.requestedTechnologies.join(', ') || 'NENHUMA'}
+ARQUIVOS ESPECÍFICOS: ${analysis.specificFiles.join(', ') || 'NENHUM'}
 
-REGRA ABSOLUTA: Crie APENAS o que está EXPLICITAMENTE mencionado na descrição. NÃO adicione nada extra.`;
+🚨 REGRA ABSOLUTA: 
+- Crie APENAS o que está TEXTUALMENTE na descrição
+- NÃO adicione bibliotecas, frameworks ou tecnologias não mencionadas
+- NÃO crie arquivos de configuração extras
+- NÃO adicione funcionalidades "úteis" não pedidas
+- LIMITE-SE ESTRITAMENTE ao solicitado`;
 
-    const restrictivePrompts: string[] = [];
+    const megaRestrictivePrompts: string[] = [];
 
-    // HTML puro solicitado
-    if (analysis.requestedTechnologies.includes('html') && role === 'frontend-dev') {
-      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS um arquivo HTML puro conforme descrito. Sem CSS, JavaScript ou outras tecnologias a menos que explicitamente mencionadas.`);
+    // SOMENTE HTML se pedido HTML puro
+    if (analysis.requestedTechnologies.includes('html') && 
+        role === 'frontend-dev' && 
+        !analysis.requestedTechnologies.includes('css') && 
+        !analysis.requestedTechnologies.includes('javascript')) {
+      megaRestrictivePrompts.push(`${ultraStrictContext}
+
+TAREFA ESPECÍFICA: Crie UM ÚNICO arquivo index.html com:
+- APENAS HTML5 básico
+- SEM CSS externo ou interno (a menos que CSS esteja na descrição)
+- SEM JavaScript (a menos que JS esteja na descrição)
+- APENAS o conteúdo descrito no projeto
+
+Exemplo de estrutura MÍNIMA:
+<!DOCTYPE html>
+<html>
+<head><title>${projectName}</title></head>
+<body>
+[APENAS o conteúdo mencionado na descrição]
+</body>
+</html>`);
     }
 
-    // CSS solicitado
-    if (analysis.requestedTechnologies.includes('css') && (role === 'designer' || role === 'frontend-dev')) {
-      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS um arquivo CSS conforme descrito. Apenas os estilos mencionados.`);
+    // SOMENTE CSS se pedido CSS puro
+    if (analysis.requestedTechnologies.includes('css') && role === 'designer') {
+      megaRestrictivePrompts.push(`${ultraStrictContext}
+
+TAREFA ESPECÍFICA: Crie UM ÚNICO arquivo styles.css com:
+- APENAS os estilos mencionados na descrição
+- SEM frameworks CSS externos
+- SEM reset.css ou normalize.css extras
+- APENAS propriedades CSS básicas mencionadas`);
     }
 
-    // JavaScript solicitado
-    if (analysis.requestedTechnologies.includes('javascript') && (role === 'developer' || role === 'frontend-dev')) {
-      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS JavaScript conforme descrito. Sem frameworks ou bibliotecas extras.`);
+    // SOMENTE JavaScript se pedido JS puro
+    if (analysis.requestedTechnologies.includes('javascript') && 
+        role === 'frontend-dev' && 
+        !analysis.requestedTechnologies.includes('react')) {
+      megaRestrictivePrompts.push(`${ultraStrictContext}
+
+TAREFA ESPECÍFICA: Crie UM ÚNICO arquivo script.js com:
+- APENAS JavaScript vanilla básico
+- SEM bibliotecas externas (jQuery, lodash, etc.)
+- SEM módulos ES6 complexos
+- APENAS as funcionalidades descritas no projeto`);
     }
 
-    // React solicitado
+    // SOMENTE React se pedido React
     if (analysis.requestedTechnologies.includes('react') && role === 'react-dev') {
-      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS componentes React conforme descrito. Apenas o que foi explicitamente pedido.`);
+      megaRestrictivePrompts.push(`${ultraStrictContext}
+
+TAREFA ESPECÍFICA: Crie UM ÚNICO componente React com:
+- APENAS React básico (sem Redux, Context desnecessário)
+- SEM bibliotecas extras não mencionadas
+- APENAS os componentes descritos no projeto
+- Estrutura mínima funcional`);
     }
 
-    // API/Backend solicitado
-    if (analysis.requestedTechnologies.includes('api') && (role === 'nodejs-dev' || role === 'backend-dev' || role === 'api-dev')) {
-      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS a API conforme descrita. Apenas os endpoints mencionados.`);
-    }
-
-    // Python solicitado
+    // SOMENTE Python se pedido Python
     if (analysis.requestedTechnologies.includes('python') && role === 'python-dev') {
-      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS código Python conforme descrito. Apenas as funcionalidades mencionadas.`);
+      megaRestrictivePrompts.push(`${ultraStrictContext}
+
+TAREFA ESPECÍFICA: Crie UM ÚNICO arquivo main.py com:
+- APENAS Python padrão (sem frameworks não mencionados)
+- SEM Django/Flask se não estiver na descrição
+- APENAS as funcionalidades mencionadas
+- Código mínimo funcional`);
     }
 
-    // Banco de dados solicitado
-    if ((analysis.requestedTechnologies.includes('sql') || analysis.requestedTechnologies.includes('mongodb')) && role === 'database-dev') {
-      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS o esquema de banco conforme descrito. Apenas as tabelas/coleções mencionadas.`);
+    // SOMENTE API se pedida API
+    if (analysis.requestedTechnologies.includes('api') && role === 'api-dev') {
+      megaRestrictivePrompts.push(`${ultraStrictContext}
+
+TAREFA ESPECÍFICA: Crie uma API mínima com:
+- APENAS os endpoints mencionados na descrição
+- SEM autenticação complexa se não pedida
+- SEM middleware extra não mencionado
+- Estrutura REST básica`);
     }
 
-    // Se nenhuma tecnologia específica, apenas documentação básica
+    // SOMENTE README se nenhuma tecnologia específica
     if (analysis.requestedTechnologies.length === 0 && role === 'product-manager') {
-      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS um README.md simples com a descrição exata do projeto. Nada mais.`);
+      megaRestrictivePrompts.push(`${ultraStrictContext}
+
+TAREFA ESPECÍFICA: Crie APENAS um README.md com:
+- Título do projeto
+- Descrição EXATA fornecida
+- NENHUMA seção técnica extra
+- NENHUMA instrução de instalação complexa
+- Máximo 50 linhas`);
     }
 
-    return restrictivePrompts;
+    return megaRestrictivePrompts;
   }
 
   private getRolePrompts(role: AgentRole, projectName: string, description: string): string[] {
