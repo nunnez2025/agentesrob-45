@@ -9,6 +9,90 @@ export interface ProjectFile {
 }
 
 class FileGeneratorService {
+  // Analisar descrição do projeto para extrair requisitos específicos
+  private analyzeProjectDescription(description: string): {
+    requestedFiles: string[];
+    technologies: string[];
+    specificRequirements: string[];
+    codeTypes: string[];
+  } {
+    const lowerDesc = description.toLowerCase();
+    
+    // Detectar tipos de arquivo específicos solicitados
+    const filePatterns = {
+      'api': ['api', 'endpoint', 'route', 'servidor', 'backend'],
+      'frontend': ['frontend', 'interface', 'ui', 'componente', 'react'],
+      'database': ['database', 'db', 'modelo', 'schema', 'tabela'],
+      'config': ['config', 'configuração', 'setup', 'env'],
+      'utils': ['util', 'helper', 'função', 'biblioteca'],
+      'test': ['test', 'teste', 'spec'],
+      'styles': ['css', 'style', 'estilo', 'design'],
+      'documentation': ['doc', 'readme', 'documentação'],
+      'component': ['componente', 'component', 'botão', 'formulário', 'modal'],
+      'page': ['página', 'page', 'tela', 'screen'],
+      'service': ['service', 'serviço', 'integração', 'integration']
+    };
+
+    const requestedFiles: string[] = [];
+    const technologies: string[] = [];
+    const specificRequirements: string[] = [];
+    const codeTypes: string[] = [];
+
+    // Identificar arquivos específicos solicitados
+    Object.entries(filePatterns).forEach(([type, keywords]) => {
+      if (keywords.some(keyword => lowerDesc.includes(keyword))) {
+        requestedFiles.push(type);
+      }
+    });
+
+    // Detectar tecnologias específicas
+    const techPatterns = {
+      'react': ['react', 'jsx', 'tsx'],
+      'node': ['node', 'nodejs', 'express'],
+      'typescript': ['typescript', 'ts'],
+      'javascript': ['javascript', 'js'],
+      'python': ['python', 'py'],
+      'sql': ['sql', 'mysql', 'postgres'],
+      'mongodb': ['mongo', 'mongodb'],
+      'tailwind': ['tailwind', 'css'],
+      'api': ['rest', 'graphql', 'api']
+    };
+
+    Object.entries(techPatterns).forEach(([tech, patterns]) => {
+      if (patterns.some(pattern => lowerDesc.includes(pattern))) {
+        technologies.push(tech);
+      }
+    });
+
+    // Extrair requisitos específicos mencionados
+    const reqPatterns = [
+      'autenticação', 'login', 'auth',
+      'crud', 'create', 'read', 'update', 'delete',
+      'dashboard', 'painel',
+      'formulário', 'form',
+      'lista', 'table', 'grid',
+      'modal', 'popup',
+      'navegação', 'menu', 'nav',
+      'carrinho', 'cart',
+      'pagamento', 'payment',
+      'upload', 'download',
+      'chat', 'messaging'
+    ];
+
+    reqPatterns.forEach(req => {
+      if (lowerDesc.includes(req)) {
+        specificRequirements.push(req);
+      }
+    });
+
+    return {
+      requestedFiles,
+      technologies,
+      specificRequirements,
+      codeTypes: requestedFiles
+    };
+  }
+
   private getRolePrompts(role: AgentRole, projectName: string, description: string): string[] {
     const baseContext = `Projeto: ${projectName}\nDescrição: ${description}`;
     
@@ -139,8 +223,83 @@ class FileGeneratorService {
     return rolePrompts[role] || [`${baseContext}\n\nCrie documentação relevante para ${role}.`];
   }
 
+  // Filtrar prompts baseados na análise da descrição
+  private getFilteredPrompts(role: AgentRole, projectName: string, description: string, analysis: {
+    requestedFiles: string[];
+    technologies: string[];
+    specificRequirements: string[];
+    codeTypes: string[];
+  }): string[] {
+    const baseContext = `Projeto: ${projectName}\nDescrição: ${description}\n\nFOCO ESPECÍFICO: ${analysis.specificRequirements.join(', ')}`;
+    
+    // Se não há requisitos específicos, usar prompts padrão
+    if (analysis.requestedFiles.length === 0 && analysis.specificRequirements.length === 0) {
+      return this.getRolePrompts(role, projectName, description);
+    }
+
+    // Gerar prompts customizados baseados na análise
+    const customPrompts: string[] = [];
+
+    // Para cada tipo de arquivo solicitado, criar prompt específico
+    analysis.requestedFiles.forEach(fileType => {
+      switch (fileType) {
+        case 'api':
+          if (['backend-dev', 'nodejs-dev', 'api-dev', 'fullstack-dev'].includes(role)) {
+            customPrompts.push(`${baseContext}\n\nCrie APENAS uma API completa com endpoints específicos mencionados na descrição. Foque apenas no que foi pedido.`);
+          }
+          break;
+        case 'frontend':
+          if (['frontend-dev', 'react-dev', 'developer', 'fullstack-dev'].includes(role)) {
+            customPrompts.push(`${baseContext}\n\nCrie APENAS os componentes frontend específicos mencionados na descrição. Não adicione funcionalidades extras.`);
+          }
+          break;
+        case 'component':
+          if (['frontend-dev', 'react-dev', 'developer'].includes(role)) {
+            customPrompts.push(`${baseContext}\n\nCrie APENAS os componentes específicos mencionados (${analysis.specificRequirements.join(', ')}). Não crie outros componentes.`);
+          }
+          break;
+        case 'database':
+          if (['database-dev', 'backend-dev', 'fullstack-dev'].includes(role)) {
+            customPrompts.push(`${baseContext}\n\nCrie APENAS o esquema de banco de dados para os requisitos específicos mencionados.`);
+          }
+          break;
+        case 'styles':
+          if (['designer', 'frontend-dev'].includes(role)) {
+            customPrompts.push(`${baseContext}\n\nCrie APENAS os estilos CSS/SCSS específicos mencionados na descrição.`);
+          }
+          break;
+        case 'config':
+          if (['devops', 'developer'].includes(role)) {
+            customPrompts.push(`${baseContext}\n\nCrie APENAS os arquivos de configuração específicos mencionados.`);
+          }
+          break;
+        case 'test':
+          if (['qa-engineer'].includes(role)) {
+            customPrompts.push(`${baseContext}\n\nCrie APENAS os testes específicos para as funcionalidades mencionadas na descrição.`);
+          }
+          break;
+        case 'documentation':
+          if (['product-manager', 'system-analyst'].includes(role)) {
+            customPrompts.push(`${baseContext}\n\nCrie APENAS a documentação específica mencionada na descrição do projeto.`);
+          }
+          break;
+      }
+    });
+
+    // Se o agente não tem prompts customizados para este projeto, retornar vazio
+    if (customPrompts.length === 0) {
+      return [];
+    }
+
+    return customPrompts;
+  }
+
   async generateFilesForAgent(agent: Agent, project: Project): Promise<ProjectFile[]> {
-    const prompts = this.getRolePrompts(agent.role, project.name, project.description);
+    // Analisar descrição do projeto para identificar requisitos específicos
+    const analysis = this.analyzeProjectDescription(project.description);
+    
+    // Filtrar prompts baseados na análise da descrição
+    const prompts = this.getFilteredPrompts(agent.role, project.name, project.description, analysis);
     const files: ProjectFile[] = [];
 
     for (const prompt of prompts) {
