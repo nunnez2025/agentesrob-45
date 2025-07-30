@@ -72,7 +72,14 @@ export const AIKeySetup = () => {
 
   const testAndSaveKey = async (provider: string) => {
     const key = keys[provider];
-    if (!key) return;
+    if (!key?.trim()) {
+      toast({
+        title: "❌ Chave Vazia",
+        description: "Por favor, insira uma chave de API válida.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setTesting(prev => ({ ...prev, [provider]: true }));
     

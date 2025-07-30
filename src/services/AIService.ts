@@ -204,11 +204,12 @@ class AIService {
     try {
       const testPrompt = "Responda apenas 'OK' se você conseguir me ouvir.";
       const response = await this.callProvider(providerConfig, testPrompt, 'system-test', apiKey);
-      return { success: response.success };
+      return { success: response.success, error: response.error };
     } catch (error) {
+      console.error(`API test error for ${provider}:`, error);
       return { 
         success: false, 
-        error: error instanceof Error ? error.message : 'API test failed' 
+        error: error instanceof Error ? error.message : 'Teste da API falhou' 
       };
     }
   }
@@ -251,28 +252,44 @@ class AIService {
   }
 
   private async callProvider(provider: AIProvider, prompt: string, role: string, apiKey: string): Promise<AIResponse> {
-    const url = provider.name === 'Gemini' 
-      ? `${provider.endpoint}?key=${apiKey}`
-      : provider.endpoint;
+    try {
+      const url = provider.name === 'Gemini' 
+        ? `${provider.endpoint}?key=${apiKey}`
+        : provider.endpoint;
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: provider.headers(apiKey),
-      body: JSON.stringify(provider.formatRequest(prompt, role)),
-    });
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: provider.headers(apiKey),
+        body: JSON.stringify(provider.formatRequest(prompt, role)),
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        return {
+          success: false,
+          content: '',
+          provider: provider.name,
+          error: `HTTP ${response.status}: ${errorText || response.statusText}`
+        };
+      }
+
+      const data = await response.json();
+      const content = provider.parseResponse(data);
+
+      return {
+        success: true,
+        content,
+        provider: provider.name
+      };
+    } catch (error) {
+      console.error(`Provider ${provider.name} error:`, error);
+      return {
+        success: false,
+        content: '',
+        provider: provider.name,
+        error: error instanceof Error ? error.message : 'Erro desconhecido na API'
+      };
     }
-
-    const data = await response.json();
-    const content = provider.parseResponse(data);
-
-    return {
-      success: true,
-      content,
-      provider: provider.name
-    };
   }
 
   private async callHuggingFace(prompt: string, role: string): Promise<AIResponse> {
