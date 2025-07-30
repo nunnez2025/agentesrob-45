@@ -121,6 +121,57 @@ class AIService {
         }
       }),
       parseResponse: (response: any) => response.text || response.answer || 'Resposta não disponível'
+    },
+    {
+      name: 'Claude',
+      endpoint: 'https://api.anthropic.com/v1/messages',
+      headers: (apiKey: string) => ({
+        'x-api-key': apiKey,
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01'
+      }),
+      formatRequest: (prompt: string, role: string) => ({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        temperature: 0.7,
+        messages: [
+          {
+            role: 'user',
+            content: `Contexto: Você é um ${role} experiente. Tarefa: ${prompt}`
+          }
+        ]
+      }),
+      parseResponse: (response: any) => response.content[0]?.text || 'Resposta não disponível'
+    },
+    {
+      name: 'Perplexity',
+      endpoint: 'https://api.perplexity.ai/chat/completions',
+      headers: (apiKey: string) => ({
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      }),
+      formatRequest: (prompt: string, role: string) => ({
+        model: 'llama-3.1-sonar-large-128k-online',
+        messages: [
+          {
+            role: 'system',
+            content: `Você é um ${role} experiente. Responda de forma prática e concisa.`
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000,
+        top_p: 0.9,
+        return_images: false,
+        return_related_questions: false,
+        search_recency_filter: 'month',
+        frequency_penalty: 1,
+        presence_penalty: 0
+      }),
+      parseResponse: (response: any) => response.choices[0]?.message?.content || 'Resposta não disponível'
     }
   ];
 

@@ -23,31 +23,45 @@ export const AIKeySetup = () => {
       icon: Brain
     },
     { 
+      name: 'Claude', 
+      description: 'Claude 4 Sonnet - Raciocínio superior', 
+      key: 'claude',
+      priority: 2,
+      icon: Rocket
+    },
+    { 
       name: 'Gemini', 
       description: 'Google Gemini Pro - IA conversacional avançada', 
       key: 'gemini',
-      priority: 2,
-      icon: Rocket
+      priority: 3,
+      icon: Brain
+    },
+    { 
+      name: 'Perplexity', 
+      description: 'Perplexity Llama - Busca em tempo real', 
+      key: 'perplexity',
+      priority: 4,
+      icon: Zap
     },
     { 
       name: 'DeepSeek', 
       description: 'DeepSeek Coder - Especialista em código', 
       key: 'deepseek',
-      priority: 3,
+      priority: 5,
       icon: Settings
     },
     { 
       name: 'Grok', 
       description: 'xAI Grok - IA criativa e inovadora', 
       key: 'grok',
-      priority: 4,
+      priority: 6,
       icon: Zap
     },
     { 
       name: 'Flowise', 
       description: 'Custom Flows - Workflows personalizados', 
       key: 'flowise',
-      priority: 5,
+      priority: 7,
       icon: Settings
     }
   ];
@@ -259,8 +273,16 @@ export const AIKeySetup = () => {
               <p className="text-muted-foreground">platform.openai.com → API Keys</p>
             </div>
             <div>
+              <h4 className="font-semibold">Anthropic Claude</h4>
+              <p className="text-muted-foreground">console.anthropic.com → API Keys</p>
+            </div>
+            <div>
               <h4 className="font-semibold">Google Gemini</h4>
               <p className="text-muted-foreground">aistudio.google.com → Get API Key</p>
+            </div>
+            <div>
+              <h4 className="font-semibold">Perplexity AI</h4>
+              <p className="text-muted-foreground">perplexity.ai → Settings → API</p>
             </div>
             <div>
               <h4 className="font-semibold">DeepSeek</h4>
