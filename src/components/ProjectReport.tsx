@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { 
   Download, 
   FileText, 
@@ -15,7 +17,8 @@ import {
   BarChart3,
   Activity,
   Zap,
-  Upload
+  Upload,
+  MessageSquare
 } from 'lucide-react';
 import { Project, Agent } from '@/types/agent';
 import { fileGeneratorService, ProjectFile } from '@/services/FileGeneratorService';
@@ -28,10 +31,20 @@ interface ProjectReportProps {
   agents: Agent[];
 }
 
+interface AgentConversation {
+  name: string;
+  role: string;
+  avatar: string;
+  message: string;
+  timestamp: Date;
+  files?: string[];
+}
+
 export const ProjectReport = ({ project, agents }: ProjectReportProps) => {
   const [generatingFiles, setGeneratingFiles] = useState(false);
   const [generatedFiles, setGeneratedFiles] = useState<ProjectFile[]>([]);
   const [progress, setProgress] = useState(0);
+  const [agentConversations, setAgentConversations] = useState<AgentConversation[]>([]);
   const { toast } = useToast();
 
   const generateProjectFiles = async () => {
@@ -72,7 +85,11 @@ export const ProjectReport = ({ project, agents }: ProjectReportProps) => {
         const progressValue = 5 + ((i + 1) / selectedAgents.length) * 85;
         
         console.log(`⚡ REAL API CALL ${i + 1}/${selectedAgents.length}: ${agent.name} (${agent.role})`);
-        setProgress(progressValue);
+          setProgress(progressValue);
+        
+        // Adicionar conversa do agente em tempo real
+        const agentMessage = generateAgentMessage(agent, project, i);
+        setAgentConversations(prev => [...prev, agentMessage]);
         
         toast({
           title: `🔥 ${agent.name} - REAL AI`,
@@ -95,10 +112,18 @@ export const ProjectReport = ({ project, agents }: ProjectReportProps) => {
             console.log(`✅ REAL AI SUCCESS: ${realAIFiles.value.length} files for ${agent.name}`);
             agentFiles = realAIFiles.value;
             
+            // Adicionar conversa de sucesso
+            const successMessage = generateSuccessMessage(agent, realAIFiles.value, project);
+            setAgentConversations(prev => [...prev, successMessage]);
+            
             // Adicionar melhorias do HuggingFace se disponíveis
             if (huggingFaceEnhancement.status === 'fulfilled') {
               console.log(`🤖 HuggingFace enhancement added for ${agent.name}`);
               agentFiles.push(...huggingFaceEnhancement.value);
+              
+              // Adicionar conversa sobre HuggingFace
+              const hfMessage = generateHuggingFaceMessage(agent);
+              setAgentConversations(prev => [...prev, hfMessage]);
             }
           } else {
             console.log(`⚠️ Real AI unavailable for ${agent.name}, using HuggingFace + enhanced fallback...`);
@@ -106,6 +131,10 @@ export const ProjectReport = ({ project, agents }: ProjectReportProps) => {
             // Se API real falhar, usar HuggingFace + fallback estruturado
             const fallbackFiles = await generateEnhancedFallbackFiles(agent, project, i, selectedAgents);
             agentFiles = fallbackFiles;
+            
+            // Adicionar conversa de fallback
+            const fallbackMessage = generateFallbackMessage(agent);
+            setAgentConversations(prev => [...prev, fallbackMessage]);
             
             if (huggingFaceEnhancement.status === 'fulfilled') {
               agentFiles.push(...huggingFaceEnhancement.value);
@@ -434,6 +463,56 @@ ${files.reduce((acc, file) => {
     return { available, working, busy, total: agents.length };
   };
 
+  // Função para gerar mensagens dos agentes em tempo real
+  const generateAgentMessage = (agent: Agent, project: Project, index: number): AgentConversation => {
+    const messages = [
+      `Iniciando análise do projeto ${project.name}. Utilizando expertise em ${agent.expertise.slice(0, 2).join(' e ')}.`,
+      `Conectando com APIs avançadas para ${agent.role}. Processando requisitos específicos...`,
+      `Analisando arquitetura e definindo estratégias para ${agent.expertise[0]}. Sistema colaborativo ativo.`,
+      `Iniciando processo de criação de código otimizado para ${project.name}. Foco em qualidade e performance.`,
+      `Ativando protocolos de ${agent.role}. Integração com sistema HuggingFace para aprimoramentos.`
+    ];
+    
+    return {
+      name: agent.name,
+      role: agent.role,
+      avatar: agent.avatar,
+      message: messages[index % messages.length],
+      timestamp: new Date(),
+    };
+  };
+
+  const generateSuccessMessage = (agent: Agent, files: any[], project: Project): AgentConversation => {
+    return {
+      name: agent.name,
+      role: agent.role,
+      avatar: agent.avatar,
+      message: `✅ Concluí com sucesso! Gerados ${files.length} arquivos de alta qualidade para ${project.name}. Aplicando melhores práticas de ${agent.expertise[0]}.`,
+      timestamp: new Date(),
+      files: files.map(f => f.name)
+    };
+  };
+
+  const generateHuggingFaceMessage = (agent: Agent): AgentConversation => {
+    return {
+      name: agent.name,
+      role: agent.role,
+      avatar: agent.avatar,
+      message: `🤖 HuggingFace AI integrado! Adicionando melhorias autônomas e otimizações avançadas. Código aprimorado com IA colaborativa.`,
+      timestamp: new Date(),
+    };
+  };
+
+  const generateFallbackMessage = (agent: Agent): AgentConversation => {
+    return {
+      name: agent.name,
+      role: agent.role,
+      avatar: agent.avatar,
+      message: `⚡ Adaptando estratégia! Utilizando sistema híbrido HuggingFace + templates especializados. Mantendo alta qualidade na entrega.`,
+      timestamp: new Date(),
+    };
+  };
+
   const getFileStats = () => {
     const byType = generatedFiles.reduce((acc, file) => {
       acc[file.type] = (acc[file.type] || 0) + 1;
@@ -529,6 +608,55 @@ ${files.reduce((acc, file) => {
                 <p className="text-sm text-muted-foreground mt-2">
                   {Math.round(progress)}% concluído
                 </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Real-time Agent Conversations */}
+          {generatingFiles && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" />
+                  Conversas dos Agentes em Tempo Real
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-96 w-full border rounded-lg p-4">
+                  <div className="space-y-4">
+                    {agentConversations.map((conversation, index) => (
+                      <div key={index} className="border-l-4 border-primary pl-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Avatar className="w-6 h-6">
+                            <AvatarImage src={conversation.avatar} />
+                            <AvatarFallback>{conversation.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <span className="font-semibold text-sm">{conversation.name}</span>
+                          <Badge variant="outline" className="text-xs">{conversation.role}</Badge>
+                          <span className="text-xs text-muted-foreground ml-auto">
+                            {new Date(conversation.timestamp).toLocaleTimeString()}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-2">{conversation.message}</p>
+                        {conversation.files && conversation.files.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {conversation.files.map((file, fileIndex) => (
+                              <Badge key={fileIndex} variant="secondary" className="text-xs">
+                                <FileText className="w-3 h-3 mr-1" />
+                                {file}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    {agentConversations.length === 0 && (
+                      <div className="text-center text-muted-foreground">
+                        Aguardando conversas dos agentes...
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
               </CardContent>
             </Card>
           )}
