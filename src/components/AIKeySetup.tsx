@@ -98,9 +98,26 @@ export const AIKeySetup = () => {
       }
     } catch (error) {
       console.error(`Real API test failed for ${provider}:`, error);
+      
+      let errorMessage = 'Verifique sua chave de API';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('401')) {
+          errorMessage = 'Chave de API inválida ou expirada';
+        } else if (error.message.includes('402')) {
+          errorMessage = 'Saldo insuficiente na conta da API';
+        } else if (error.message.includes('403')) {
+          errorMessage = 'Chave de API bloqueada ou sem permissão';
+        } else if (error.message.includes('404')) {
+          errorMessage = 'Modelo não encontrado ou indisponível';
+        } else if (error.message.includes('Load failed')) {
+          errorMessage = 'Serviço temporariamente indisponível';
+        }
+      }
+      
       toast({
         title: "❌ Chave de API Inválida",
-        description: `${provider}: ${error instanceof Error ? error.message : 'Verifique sua chave de API'}`,
+        description: `${provider}: ${errorMessage}`,
         variant: "destructive"
       });
     } finally {

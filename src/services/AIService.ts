@@ -108,7 +108,7 @@ class AIService {
     },
     {
       name: 'Flowise',
-      endpoint: 'https://api.flowise.com/api/v1/prediction',
+      endpoint: 'https://api.flowise.ai/api/v1/prediction',
       headers: (apiKey: string) => ({
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
