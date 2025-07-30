@@ -9,88 +9,145 @@ export interface ProjectFile {
 }
 
 class FileGeneratorService {
-  // Analisar descrição do projeto para extrair requisitos específicos
+  // Analisar descrição EXATAMENTE como pedida - modo ultra-restritivo
   private analyzeProjectDescription(description: string): {
-    requestedFiles: string[];
-    technologies: string[];
-    specificRequirements: string[];
-    codeTypes: string[];
+    requestedTechnologies: string[];
+    specificFiles: string[];
+    exactRequirements: string[];
+    allowedAgentRoles: AgentRole[];
   } {
     const lowerDesc = description.toLowerCase();
     
-    // Detectar tipos de arquivo específicos solicitados
-    const filePatterns = {
-      'api': ['api', 'endpoint', 'route', 'servidor', 'backend'],
-      'frontend': ['frontend', 'interface', 'ui', 'componente', 'react'],
-      'database': ['database', 'db', 'modelo', 'schema', 'tabela'],
-      'config': ['config', 'configuração', 'setup', 'env'],
-      'utils': ['util', 'helper', 'função', 'biblioteca'],
-      'test': ['test', 'teste', 'spec'],
-      'styles': ['css', 'style', 'estilo', 'design'],
-      'documentation': ['doc', 'readme', 'documentação'],
-      'component': ['componente', 'component', 'botão', 'formulário', 'modal'],
-      'page': ['página', 'page', 'tela', 'screen'],
-      'service': ['service', 'serviço', 'integração', 'integration']
+    // Detectar APENAS tecnologias EXPLICITAMENTE mencionadas
+    const techMentions = {
+      'html': ['html', '.html'],
+      'css': ['css', '.css', 'estilo', 'style'],
+      'javascript': ['javascript', 'js', '.js'],
+      'typescript': ['typescript', 'ts', '.ts'],
+      'react': ['react', 'jsx', '.jsx', 'tsx', '.tsx'],
+      'nodejs': ['node', 'nodejs', 'express'],
+      'python': ['python', '.py'],
+      'php': ['php', '.php'],
+      'java': ['java', '.java'],
+      'sql': ['sql', 'mysql', 'postgres', 'database'],
+      'mongodb': ['mongodb', 'mongo'],
+      'api': ['api', 'endpoint', 'rest'],
+      'json': ['json', '.json']
     };
 
-    const requestedFiles: string[] = [];
-    const technologies: string[] = [];
-    const specificRequirements: string[] = [];
-    const codeTypes: string[] = [];
-
-    // Identificar arquivos específicos solicitados
-    Object.entries(filePatterns).forEach(([type, keywords]) => {
+    const requestedTechnologies: string[] = [];
+    
+    // Só adicionar tecnologias EXPLICITAMENTE mencionadas
+    Object.entries(techMentions).forEach(([tech, keywords]) => {
       if (keywords.some(keyword => lowerDesc.includes(keyword))) {
-        requestedFiles.push(type);
+        requestedTechnologies.push(tech);
       }
     });
 
-    // Detectar tecnologias específicas
-    const techPatterns = {
-      'react': ['react', 'jsx', 'tsx'],
-      'node': ['node', 'nodejs', 'express'],
-      'typescript': ['typescript', 'ts'],
-      'javascript': ['javascript', 'js'],
-      'python': ['python', 'py'],
-      'sql': ['sql', 'mysql', 'postgres'],
-      'mongodb': ['mongo', 'mongodb'],
-      'tailwind': ['tailwind', 'css'],
-      'api': ['rest', 'graphql', 'api']
-    };
+    // Detectar arquivos específicos mencionados
+    const fileExtensions = lowerDesc.match(/\.\w+/g) || [];
+    const specificFiles = fileExtensions.map(ext => ext.toLowerCase());
 
-    Object.entries(techPatterns).forEach(([tech, patterns]) => {
-      if (patterns.some(pattern => lowerDesc.includes(pattern))) {
-        technologies.push(tech);
-      }
-    });
+    // Extrair requisitos EXATOS da descrição
+    const exactRequirements = description.split(/[.,;]/).map(req => req.trim()).filter(req => req.length > 0);
 
-    // Extrair requisitos específicos mencionados
-    const reqPatterns = [
-      'autenticação', 'login', 'auth',
-      'crud', 'create', 'read', 'update', 'delete',
-      'dashboard', 'painel',
-      'formulário', 'form',
-      'lista', 'table', 'grid',
-      'modal', 'popup',
-      'navegação', 'menu', 'nav',
-      'carrinho', 'cart',
-      'pagamento', 'payment',
-      'upload', 'download',
-      'chat', 'messaging'
-    ];
+    // Mapear tecnologias para agentes permitidos
+    const allowedAgentRoles: AgentRole[] = [];
+    
+    if (requestedTechnologies.includes('html') || requestedTechnologies.includes('css')) {
+      allowedAgentRoles.push('frontend-dev', 'designer');
+    }
+    if (requestedTechnologies.includes('javascript')) {
+      allowedAgentRoles.push('developer', 'frontend-dev');
+    }
+    if (requestedTechnologies.includes('react') || requestedTechnologies.includes('typescript')) {
+      allowedAgentRoles.push('react-dev', 'developer');
+    }
+    if (requestedTechnologies.includes('nodejs') || requestedTechnologies.includes('api')) {
+      allowedAgentRoles.push('nodejs-dev', 'backend-dev', 'api-dev');
+    }
+    if (requestedTechnologies.includes('python')) {
+      allowedAgentRoles.push('python-dev');
+    }
+    if (requestedTechnologies.includes('sql') || requestedTechnologies.includes('mongodb')) {
+      allowedAgentRoles.push('database-dev');
+    }
 
-    reqPatterns.forEach(req => {
-      if (lowerDesc.includes(req)) {
-        specificRequirements.push(req);
-      }
-    });
+    // Se nenhuma tecnologia específica foi mencionada, permitir apenas documentação
+    if (requestedTechnologies.length === 0) {
+      allowedAgentRoles.push('product-manager', 'copywriter');
+    }
 
     return {
-      requestedFiles,
-      technologies,
-      specificRequirements,
-      codeTypes: requestedFiles
+      requestedTechnologies,
+      specificFiles,
+      exactRequirements,
+      allowedAgentRoles
     };
+  }
+
+  // Filtrar prompts ULTRA-RESTRITIVOS baseados EXATAMENTE na descrição
+  private getFilteredPrompts(role: AgentRole, projectName: string, description: string, analysis: {
+    requestedTechnologies: string[];
+    specificFiles: string[];
+    exactRequirements: string[];
+    allowedAgentRoles: AgentRole[];
+  }): string[] {
+    
+    // Se o agente não está na lista permitida, retornar vazio
+    if (!analysis.allowedAgentRoles.includes(role)) {
+      return [];
+    }
+
+    const strictContext = `PROJETO: ${projectName}
+DESCRIÇÃO EXATA: ${description}
+TECNOLOGIAS PERMITIDAS: ${analysis.requestedTechnologies.join(', ')}
+
+REGRA ABSOLUTA: Crie APENAS o que está EXPLICITAMENTE mencionado na descrição. NÃO adicione nada extra.`;
+
+    const restrictivePrompts: string[] = [];
+
+    // HTML puro solicitado
+    if (analysis.requestedTechnologies.includes('html') && role === 'frontend-dev') {
+      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS um arquivo HTML puro conforme descrito. Sem CSS, JavaScript ou outras tecnologias a menos que explicitamente mencionadas.`);
+    }
+
+    // CSS solicitado
+    if (analysis.requestedTechnologies.includes('css') && (role === 'designer' || role === 'frontend-dev')) {
+      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS um arquivo CSS conforme descrito. Apenas os estilos mencionados.`);
+    }
+
+    // JavaScript solicitado
+    if (analysis.requestedTechnologies.includes('javascript') && (role === 'developer' || role === 'frontend-dev')) {
+      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS JavaScript conforme descrito. Sem frameworks ou bibliotecas extras.`);
+    }
+
+    // React solicitado
+    if (analysis.requestedTechnologies.includes('react') && role === 'react-dev') {
+      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS componentes React conforme descrito. Apenas o que foi explicitamente pedido.`);
+    }
+
+    // API/Backend solicitado
+    if (analysis.requestedTechnologies.includes('api') && (role === 'nodejs-dev' || role === 'backend-dev' || role === 'api-dev')) {
+      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS a API conforme descrita. Apenas os endpoints mencionados.`);
+    }
+
+    // Python solicitado
+    if (analysis.requestedTechnologies.includes('python') && role === 'python-dev') {
+      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS código Python conforme descrito. Apenas as funcionalidades mencionadas.`);
+    }
+
+    // Banco de dados solicitado
+    if ((analysis.requestedTechnologies.includes('sql') || analysis.requestedTechnologies.includes('mongodb')) && role === 'database-dev') {
+      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS o esquema de banco conforme descrito. Apenas as tabelas/coleções mencionadas.`);
+    }
+
+    // Se nenhuma tecnologia específica, apenas documentação básica
+    if (analysis.requestedTechnologies.length === 0 && role === 'product-manager') {
+      restrictivePrompts.push(`${strictContext}\n\nCrie APENAS um README.md simples com a descrição exata do projeto. Nada mais.`);
+    }
+
+    return restrictivePrompts;
   }
 
   private getRolePrompts(role: AgentRole, projectName: string, description: string): string[] {
@@ -223,77 +280,6 @@ class FileGeneratorService {
     return rolePrompts[role] || [`${baseContext}\n\nCrie documentação relevante para ${role}.`];
   }
 
-  // Filtrar prompts baseados na análise da descrição
-  private getFilteredPrompts(role: AgentRole, projectName: string, description: string, analysis: {
-    requestedFiles: string[];
-    technologies: string[];
-    specificRequirements: string[];
-    codeTypes: string[];
-  }): string[] {
-    const baseContext = `Projeto: ${projectName}\nDescrição: ${description}\n\nFOCO ESPECÍFICO: ${analysis.specificRequirements.join(', ')}`;
-    
-    // Se não há requisitos específicos, usar prompts padrão
-    if (analysis.requestedFiles.length === 0 && analysis.specificRequirements.length === 0) {
-      return this.getRolePrompts(role, projectName, description);
-    }
-
-    // Gerar prompts customizados baseados na análise
-    const customPrompts: string[] = [];
-
-    // Para cada tipo de arquivo solicitado, criar prompt específico
-    analysis.requestedFiles.forEach(fileType => {
-      switch (fileType) {
-        case 'api':
-          if (['backend-dev', 'nodejs-dev', 'api-dev', 'fullstack-dev'].includes(role)) {
-            customPrompts.push(`${baseContext}\n\nCrie APENAS uma API completa com endpoints específicos mencionados na descrição. Foque apenas no que foi pedido.`);
-          }
-          break;
-        case 'frontend':
-          if (['frontend-dev', 'react-dev', 'developer', 'fullstack-dev'].includes(role)) {
-            customPrompts.push(`${baseContext}\n\nCrie APENAS os componentes frontend específicos mencionados na descrição. Não adicione funcionalidades extras.`);
-          }
-          break;
-        case 'component':
-          if (['frontend-dev', 'react-dev', 'developer'].includes(role)) {
-            customPrompts.push(`${baseContext}\n\nCrie APENAS os componentes específicos mencionados (${analysis.specificRequirements.join(', ')}). Não crie outros componentes.`);
-          }
-          break;
-        case 'database':
-          if (['database-dev', 'backend-dev', 'fullstack-dev'].includes(role)) {
-            customPrompts.push(`${baseContext}\n\nCrie APENAS o esquema de banco de dados para os requisitos específicos mencionados.`);
-          }
-          break;
-        case 'styles':
-          if (['designer', 'frontend-dev'].includes(role)) {
-            customPrompts.push(`${baseContext}\n\nCrie APENAS os estilos CSS/SCSS específicos mencionados na descrição.`);
-          }
-          break;
-        case 'config':
-          if (['devops', 'developer'].includes(role)) {
-            customPrompts.push(`${baseContext}\n\nCrie APENAS os arquivos de configuração específicos mencionados.`);
-          }
-          break;
-        case 'test':
-          if (['qa-engineer'].includes(role)) {
-            customPrompts.push(`${baseContext}\n\nCrie APENAS os testes específicos para as funcionalidades mencionadas na descrição.`);
-          }
-          break;
-        case 'documentation':
-          if (['product-manager', 'system-analyst'].includes(role)) {
-            customPrompts.push(`${baseContext}\n\nCrie APENAS a documentação específica mencionada na descrição do projeto.`);
-          }
-          break;
-      }
-    });
-
-    // Se o agente não tem prompts customizados para este projeto, retornar vazio
-    if (customPrompts.length === 0) {
-      return [];
-    }
-
-    return customPrompts;
-  }
-
   async generateFilesForAgent(agent: Agent, project: Project): Promise<ProjectFile[]> {
     // Analisar descrição do projeto para identificar requisitos específicos
     const analysis = this.analyzeProjectDescription(project.description);
@@ -339,7 +325,7 @@ class FileGeneratorService {
     const defaultNames: Record<AgentRole, string[]> = {
       'product-manager': ['PRD.md', 'README.md'],
       'developer': ['App.tsx', 'package.json', 'vite.config.ts'],
-      'frontend-dev': ['components.tsx', 'hooks.ts'],
+      'frontend-dev': ['index.html', 'styles.css'],
       'designer': ['styles.css', 'design-system.md'],
       'backend-dev': ['server.js', 'docker-compose.yml'],
       'qa-engineer': ['tests.test.tsx', 'e2e.spec.ts'],
@@ -377,7 +363,7 @@ class FileGeneratorService {
     if (fileName.endsWith('.tsx') || fileName.endsWith('.ts') || fileName.endsWith('.js') || fileName.endsWith('.json')) {
       return 'code';
     }
-    if (fileName.endsWith('.css') || fileName.endsWith('.scss')) {
+    if (fileName.endsWith('.css') || fileName.endsWith('.scss') || fileName.endsWith('.html')) {
       return 'design';
     }
     if (fileName.endsWith('.yml') || fileName.endsWith('.yaml') || fileName.endsWith('.xml') || fileName.endsWith('.txt')) {
@@ -390,8 +376,8 @@ class FileGeneratorService {
     const rolePaths: Record<AgentRole, string> = {
       'product-manager': 'docs/',
       'developer': 'src/',
-      'frontend-dev': 'src/components/',
-      'designer': 'src/styles/',
+      'frontend-dev': '',
+      'designer': 'assets/',
       'backend-dev': 'server/',
       'qa-engineer': 'tests/',
       'copywriter': 'content/',
@@ -453,7 +439,7 @@ class FileGeneratorService {
 
     // Add all generated files
     files.forEach(file => {
-      const fullPath = file.path.endsWith('/') ? file.path + file.name : file.path + file.name;
+      const fullPath = file.path + file.name;
       zip.file(fullPath, file.content);
     });
 
