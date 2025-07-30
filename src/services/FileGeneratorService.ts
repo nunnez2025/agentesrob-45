@@ -118,7 +118,7 @@ class FileGeneratorService {
     };
   }
 
-  // Filtrar prompts MEGA-RESTRITIVOS - APENAS o que foi pedido LITERALMENTE
+  // Sistema EXTREMAMENTE RESTRITIVO - UMA linguagem = UM arquivo
   private getFilteredPrompts(role: AgentRole, projectName: string, description: string, analysis: {
     requestedTechnologies: string[];
     specificFiles: string[];
@@ -126,118 +126,153 @@ class FileGeneratorService {
     allowedAgentRoles: AgentRole[];
   }): string[] {
     
-    // REGRA PRIMÁRIA: Se o agente não está permitido, ZERO arquivos
+    // BLOQUEIO TOTAL: Se agente não permitido = ZERO prompts
     if (!analysis.allowedAgentRoles.includes(role)) {
       return [];
     }
 
-    const ultraStrictContext = `PROJETO: ${projectName}
-DESCRIÇÃO LITERAL: ${description}
-TECNOLOGIAS EXPLÍCITAS: ${analysis.requestedTechnologies.join(', ') || 'NENHUMA'}
-ARQUIVOS ESPECÍFICOS: ${analysis.specificFiles.join(', ') || 'NENHUM'}
+    const hyperStrictContext = `PROJETO: ${projectName}
+DESCRIÇÃO LITERAL: "${description}"
+LINGUAGEM PERMITIDA: ${analysis.requestedTechnologies[0] || 'NENHUMA'}
 
-🚨 REGRA ABSOLUTA: 
-- Crie APENAS o que está TEXTUALMENTE na descrição
-- NÃO adicione bibliotecas, frameworks ou tecnologias não mencionadas
-- NÃO crie arquivos de configuração extras
-- NÃO adicione funcionalidades "úteis" não pedidas
-- LIMITE-SE ESTRITAMENTE ao solicitado`;
+🔒 REGRAS ABSOLUTAS:
+1. Crie APENAS 1 arquivo na linguagem especificada
+2. NÃO misture tecnologias (HTML não pode ter CSS/JS interno)
+3. NÃO adicione imports, requires ou dependências externas
+4. NÃO crie arquivos de configuração (package.json, etc.)
+5. MÁXIMO 100 linhas de código
+6. APENAS código básico da linguagem pedida`;
 
-    const megaRestrictivePrompts: string[] = [];
+    const singleFilePrompts: string[] = [];
 
-    // SOMENTE HTML se pedido HTML puro
-    if (analysis.requestedTechnologies.includes('html') && 
-        role === 'frontend-dev' && 
-        !analysis.requestedTechnologies.includes('css') && 
-        !analysis.requestedTechnologies.includes('javascript')) {
-      megaRestrictivePrompts.push(`${ultraStrictContext}
+    // SE PEDIU HTML → APENAS HTML PURO
+    if (analysis.requestedTechnologies.includes('html') && role === 'frontend-dev') {
+      singleFilePrompts.push(`${hyperStrictContext}
 
-TAREFA ESPECÍFICA: Crie UM ÚNICO arquivo index.html com:
-- APENAS HTML5 básico
-- SEM CSS externo ou interno (a menos que CSS esteja na descrição)
-- SEM JavaScript (a menos que JS esteja na descrição)
-- APENAS o conteúdo descrito no projeto
+TAREFA: Crie APENAS index.html com:
+- Estrutura HTML5 básica
+- SEM <style> interno
+- SEM <script> interno  
+- SEM links externos
+- APENAS tags HTML semânticas
 
-Exemplo de estrutura MÍNIMA:
+Formato exato:
 <!DOCTYPE html>
-<html>
-<head><title>${projectName}</title></head>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>${projectName}</title>
+</head>
 <body>
-[APENAS o conteúdo mencionado na descrição]
+    <!-- APENAS conteúdo HTML da descrição -->
 </body>
 </html>`);
     }
 
-    // SOMENTE CSS se pedido CSS puro
-    if (analysis.requestedTechnologies.includes('css') && role === 'designer') {
-      megaRestrictivePrompts.push(`${ultraStrictContext}
+    // SE PEDIU CSS → APENAS CSS PURO
+    else if (analysis.requestedTechnologies.includes('css') && role === 'designer') {
+      singleFilePrompts.push(`${hyperStrictContext}
 
-TAREFA ESPECÍFICA: Crie UM ÚNICO arquivo styles.css com:
-- APENAS os estilos mencionados na descrição
-- SEM frameworks CSS externos
-- SEM reset.css ou normalize.css extras
-- APENAS propriedades CSS básicas mencionadas`);
+TAREFA: Crie APENAS styles.css com:
+- Propriedades CSS básicas
+- SEM @import externos
+- SEM JavaScript no CSS
+- SEM preprocessadores (SASS/LESS)
+
+Formato:
+/* Estilos para ${projectName} */
+/* APENAS seletores básicos CSS */`);
     }
 
-    // SOMENTE JavaScript se pedido JS puro
-    if (analysis.requestedTechnologies.includes('javascript') && 
-        role === 'frontend-dev' && 
-        !analysis.requestedTechnologies.includes('react')) {
-      megaRestrictivePrompts.push(`${ultraStrictContext}
+    // SE PEDIU JAVASCRIPT → APENAS JS VANILLA
+    else if (analysis.requestedTechnologies.includes('javascript') && role === 'frontend-dev') {
+      singleFilePrompts.push(`${hyperStrictContext}
 
-TAREFA ESPECÍFICA: Crie UM ÚNICO arquivo script.js com:
-- APENAS JavaScript vanilla básico
-- SEM bibliotecas externas (jQuery, lodash, etc.)
-- SEM módulos ES6 complexos
-- APENAS as funcionalidades descritas no projeto`);
+TAREFA: Crie APENAS script.js com:
+- JavaScript ES5/ES6 básico
+- SEM imports/requires
+- SEM bibliotecas externas
+- SEM DOM complexo
+
+Formato:
+// ${projectName}
+// APENAS funções JavaScript básicas`);
     }
 
-    // SOMENTE React se pedido React
-    if (analysis.requestedTechnologies.includes('react') && role === 'react-dev') {
-      megaRestrictivePrompts.push(`${ultraStrictContext}
+    // SE PEDIU REACT → APENAS 1 COMPONENTE
+    else if (analysis.requestedTechnologies.includes('react') && role === 'react-dev') {
+      singleFilePrompts.push(`${hyperStrictContext}
 
-TAREFA ESPECÍFICA: Crie UM ÚNICO componente React com:
-- APENAS React básico (sem Redux, Context desnecessário)
-- SEM bibliotecas extras não mencionadas
-- APENAS os componentes descritos no projeto
-- Estrutura mínima funcional`);
+TAREFA: Crie APENAS App.jsx com:
+- 1 componente React básico
+- SEM hooks complexos (apenas useState se necessário)
+- SEM bibliotecas externas
+- SEM CSS modules
+
+Formato:
+import React from 'react';
+
+function App() {
+  return (
+    <div>
+      {/* APENAS JSX da descrição */}
+    </div>
+  );
+}
+
+export default App;`);
     }
 
-    // SOMENTE Python se pedido Python
-    if (analysis.requestedTechnologies.includes('python') && role === 'python-dev') {
-      megaRestrictivePrompts.push(`${ultraStrictContext}
+    // SE PEDIU PYTHON → APENAS 1 SCRIPT
+    else if (analysis.requestedTechnologies.includes('python') && role === 'python-dev') {
+      singleFilePrompts.push(`${hyperStrictContext}
 
-TAREFA ESPECÍFICA: Crie UM ÚNICO arquivo main.py com:
-- APENAS Python padrão (sem frameworks não mencionados)
-- SEM Django/Flask se não estiver na descrição
-- APENAS as funcionalidades mencionadas
-- Código mínimo funcional`);
+TAREFA: Crie APENAS main.py com:
+- Python básico
+- SEM imports de bibliotecas externas
+- SEM frameworks (Django/Flask)
+- APENAS funções básicas
+
+Formato:
+# ${projectName}
+# APENAS código Python da descrição
+
+def main():
+    # implementação básica
+    pass
+
+if __name__ == "__main__":
+    main()`);
     }
 
-    // SOMENTE API se pedida API
-    if (analysis.requestedTechnologies.includes('api') && role === 'api-dev') {
-      megaRestrictivePrompts.push(`${ultraStrictContext}
+    // SE PEDIU JAVA → APENAS 1 CLASSE
+    else if (analysis.requestedTechnologies.includes('java') && role === 'developer') {
+      singleFilePrompts.push(`${hyperStrictContext}
 
-TAREFA ESPECÍFICA: Crie uma API mínima com:
-- APENAS os endpoints mencionados na descrição
-- SEM autenticação complexa se não pedida
-- SEM middleware extra não mencionado
-- Estrutura REST básica`);
+TAREFA: Crie APENAS Main.java com:
+- 1 classe Java básica
+- SEM imports externos
+- SEM frameworks
+- Apenas métodos básicos`);
     }
 
-    // SOMENTE README se nenhuma tecnologia específica
-    if (analysis.requestedTechnologies.length === 0 && role === 'product-manager') {
-      megaRestrictivePrompts.push(`${ultraStrictContext}
+    // SE NENHUMA LINGUAGEM → APENAS README MÍNIMO
+    else if (analysis.requestedTechnologies.length === 0 && role === 'product-manager') {
+      singleFilePrompts.push(`${hyperStrictContext}
 
-TAREFA ESPECÍFICA: Crie APENAS um README.md com:
+TAREFA: Crie APENAS README.md com:
 - Título do projeto
-- Descrição EXATA fornecida
-- NENHUMA seção técnica extra
-- NENHUMA instrução de instalação complexa
-- Máximo 50 linhas`);
+- Descrição original
+- MÁXIMO 20 linhas
+- SEM seções técnicas
+
+Formato:
+# ${projectName}
+
+${description}`);
     }
 
-    return megaRestrictivePrompts;
+    return singleFilePrompts;
   }
 
   private getRolePrompts(role: AgentRole, projectName: string, description: string): string[] {

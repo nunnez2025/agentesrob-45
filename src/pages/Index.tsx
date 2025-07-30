@@ -8,10 +8,9 @@ import { ChatInterface } from '@/components/ChatInterface';
 import { ProjectDashboard } from '@/components/ProjectDashboard';
 import { AIKeySetup } from '@/components/AIKeySetup';
 import { ProjectReport } from '@/components/ProjectReport';
-import { EnhancedZipAnalyzer } from '@/components/EnhancedZipAnalyzer';
 import { useAgentSystem } from '@/hooks/useAgentSystem';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Users, MessageSquare, BarChart3, Settings, Bot, Upload } from 'lucide-react';
+import { Plus, Users, MessageSquare, BarChart3, Settings, Bot } from 'lucide-react';
 
 const Index = () => {
   const [projectName, setProjectName] = useState('');
@@ -53,14 +52,10 @@ const Index = () => {
           </div>
 
           <Tabs defaultValue="project" className="max-w-4xl mx-auto mb-8">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="project">
                 <Plus className="mr-2 h-4 w-4" />
                 Criar Projeto
-              </TabsTrigger>
-              <TabsTrigger value="zip">
-                <Upload className="mr-2 h-4 w-4" />
-                Análise ZIP
               </TabsTrigger>
               <TabsTrigger value="setup">
                 <Settings className="mr-2 h-4 w-4" />
@@ -70,10 +65,6 @@ const Index = () => {
 
             <TabsContent value="setup" className="mt-6">
               <AIKeySetup />
-            </TabsContent>
-
-            <TabsContent value="zip" className="mt-6">
-              <EnhancedZipAnalyzer />
             </TabsContent>
 
             <TabsContent value="project" className="mt-6">
