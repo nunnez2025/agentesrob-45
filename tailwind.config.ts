@@ -18,6 +18,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				'cyber': ['Orbitron', 'sans-serif'],
+				'mono': ['JetBrains Mono', 'monospace'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -84,17 +88,20 @@ export default {
 			},
 			backgroundImage: {
 				'gradient-primary': 'var(--gradient-primary)',
-				'gradient-accent': 'var(--gradient-accent)',
-				'gradient-success': 'var(--gradient-success)'
+				'gradient-chaos': 'var(--gradient-chaos)',
+				'gradient-corruption': 'var(--gradient-corruption)'
 			},
 			boxShadow: {
 				'glow': 'var(--shadow-glow)',
-				'card': 'var(--shadow-card)'
+				'chaos': 'var(--shadow-chaos)',
+				'corruption': 'var(--shadow-corruption)',
+				'digital': 'var(--shadow-digital)'
 			},
 			transitionDuration: {
-				'fast': 'var(--animation-fast)',
-				'normal': 'var(--animation-normal)',
-				'slow': 'var(--animation-slow)'
+				'glitch': 'var(--animation-glitch)',
+				'pulse': 'var(--animation-pulse)',
+				'flicker': 'var(--animation-flicker)',
+				'chaos': 'var(--animation-chaos)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -117,11 +124,49 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'glitch': {
+					'0%, 14%, 15%, 49%, 50%, 99%, 100%': { 
+						transform: 'translate(0)',
+					},
+					'15%, 49%': { 
+						transform: 'translate(-2px, 1px)',
+					},
+				},
+				'chaos-pulse': {
+					'0%, 100%': {
+						boxShadow: '0 0 20px hsl(120 100% 50% / 0.4)',
+						transform: 'scale(1)',
+					},
+					'50%': {
+						boxShadow: '0 0 40px hsl(280 100% 65% / 0.6)',
+						transform: 'scale(1.02)',
+					},
+				},
+				'scan': {
+					'0%': { 
+						backgroundPosition: '0 0',
+					},
+					'100%': { 
+						backgroundPosition: '0 100px',
+					},
+				},
+				'flicker': {
+					'0%, 100%': { 
+						opacity: '1',
+					},
+					'50%': { 
+						opacity: '0.8',
+					},
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'glitch': 'glitch 0.3s infinite linear',
+				'chaos-pulse': 'chaos-pulse 2s infinite',
+				'scan': 'scan 2s linear infinite',
+				'flicker': 'flicker 0.15s linear infinite alternate'
 			}
 		}
 	},

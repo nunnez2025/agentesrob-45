@@ -1,68 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
+/* JOKER CYBERPUNK CHAOS DESIGN SYSTEM */
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    /* Absolute black chaos background */
+    --background: 0 0% 2%;
+    --foreground: 120 100% 85%;
 
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    /* Corrupted digital surfaces */
+    --card: 0 0% 4%;
+    --card-foreground: 120 100% 85%;
 
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 3%;
+    --popover-foreground: 120 100% 85%;
 
-    --primary: 142 76% 36%;
-    --primary-foreground: 355.7 100% 97.3%;
+    /* Acid neon green primary */
+    --primary: 120 100% 50%;
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    /* Chrome steel secondary */
+    --secondary: 240 8% 25%;
+    --secondary-foreground: 120 100% 85%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    /* Muted corruption */
+    --muted: 0 0% 8%;
+    --muted-foreground: 120 50% 45%;
 
-    --accent: 12 6.5% 15.1%;
-    --accent-foreground: 0 0% 98%;
+    /* Electric purple accent */
+    --accent: 280 100% 65%;
+    --accent-foreground: 0 0% 0%;
 
-    --destructive: 0 84.2% 60.2%;
+    /* Crimson destruction */
+    --destructive: 0 100% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 142 76% 36%;
+    /* Digital borders */
+    --border: 120 100% 25%;
+    --input: 0 0% 8%;
+    --ring: 120 100% 50%;
 
-    --success: 142 76% 36%;
-    --success-foreground: 355.7 100% 97.3%;
+    /* Status colors */
+    --success: 120 100% 50%;
+    --success-foreground: 0 0% 0%;
     
-    --warning: 38 92% 50%;
-    --warning-foreground: 48 96% 89%;
+    --warning: 60 100% 50%;
+    --warning-foreground: 0 0% 0%;
     
-    --info: 221 83% 53%;
-    --info-foreground: 210 40% 98%;
+    --info: 200 100% 50%;
+    --info-foreground: 0 0% 0%;
 
-    --agent-developer: 217 91% 60%;
-    --agent-designer: 262 83% 58%;
-    --agent-analyst: 142 76% 36%;
-    --agent-writer: 38 92% 50%;
-    --agent-manager: 0 84% 60%;
+    /* Agent chaos colors */
+    --agent-developer: 280 100% 65%;
+    --agent-designer: 320 100% 65%;
+    --agent-analyst: 120 100% 50%;
+    --agent-writer: 60 100% 50%;
+    --agent-manager: 0 100% 45%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(142 86% 28%));
-    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(210 40% 90%));
-    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(142 86% 28%));
+    /* Chaotic gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(120 100% 50%), hsl(120 100% 30%), hsl(280 100% 65%));
+    --gradient-chaos: linear-gradient(45deg, hsl(120 100% 50%), hsl(0 100% 45%), hsl(280 100% 65%), hsl(60 100% 50%));
+    --gradient-corruption: linear-gradient(90deg, hsl(0 0% 2%), hsl(0 0% 8%), hsl(0 0% 2%));
     
-    --shadow-glow: 0 0 20px hsl(var(--primary) / 0.3);
-    --shadow-card: 0 4px 20px hsl(0 0% 0% / 0.3);
+    /* Digital shadows and glows */
+    --shadow-glow: 0 0 30px hsl(120 100% 50% / 0.6);
+    --shadow-chaos: 0 0 50px hsl(280 100% 65% / 0.4);
+    --shadow-corruption: 0 0 20px hsl(0 100% 45% / 0.3);
+    --shadow-digital: 0 0 15px hsl(120 100% 50% / 0.8);
     
-    --animation-fast: 0.15s ease-out;
-    --animation-normal: 0.3s ease-out;
-    --animation-slow: 0.5s ease-out;
+    /* Chaotic animations */
+    --animation-glitch: 0.1s steps(2, end);
+    --animation-pulse: 1s ease-in-out infinite alternate;
+    --animation-flicker: 0.15s linear infinite alternate;
+    --animation-chaos: 2s ease-in-out infinite;
 
-    --radius: 0.75rem;
+    --radius: 0.25rem;
 
     --sidebar-background: 0 0% 98%;
 
@@ -126,6 +141,211 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-mono;
+    background-image: 
+      radial-gradient(circle at 25% 25%, hsl(120 100% 50% / 0.03) 1px, transparent 1px),
+      radial-gradient(circle at 75% 75%, hsl(280 100% 65% / 0.03) 1px, transparent 1px);
+    background-size: 50px 50px, 75px 75px;
+    animation: chaos-grain 3s ease-in-out infinite;
+  }
+}
+
+@layer components {
+  /* GLITCH EFFECT */
+  .glitch {
+    position: relative;
+    color: hsl(var(--foreground));
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+  }
+  
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .glitch::before {
+    animation: glitch-1 var(--animation-glitch) infinite linear;
+    color: hsl(120 100% 50%);
+    z-index: -1;
+  }
+  
+  .glitch::after {
+    animation: glitch-2 var(--animation-glitch) infinite linear;
+    color: hsl(280 100% 65%);
+    z-index: -2;
+  }
+
+  /* CYBERPUNK BUTTONS */
+  .cyber-button {
+    @apply relative overflow-hidden bg-gradient-to-r from-primary/20 to-accent/20;
+    @apply border border-primary/50 text-primary font-mono font-bold;
+    @apply transition-all duration-300 hover:shadow-digital;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+  
+  .cyber-button::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-0;
+    @apply transition-opacity duration-300;
+    z-index: -1;
+  }
+  
+  .cyber-button:hover::before {
+    @apply opacity-20;
+  }
+
+  /* HACKER CARD */
+  .hacker-card {
+    @apply relative bg-card/80 backdrop-blur-sm border border-primary/30;
+    @apply shadow-lg transition-all duration-300;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+  
+  .hacker-card::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5;
+    @apply opacity-0 transition-opacity duration-300;
+    z-index: -1;
+  }
+  
+  .hacker-card:hover::before {
+    @apply opacity-100;
+  }
+  
+  .hacker-card:hover {
+    @apply shadow-chaos transform-gpu scale-[1.02];
+  }
+
+  /* DIGITAL NOISE */
+  .digital-noise {
+    background-image: 
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 98px,
+        hsl(120 100% 50% / 0.03) 100px
+      );
+    animation: scan-lines 2s linear infinite;
+  }
+
+  /* JOKER AVATAR */
+  .joker-avatar {
+    @apply relative overflow-hidden;
+    filter: saturate(1.5) contrast(1.2);
+  }
+  
+  .joker-avatar::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20;
+    @apply opacity-0 transition-opacity duration-300;
+    mix-blend-mode: overlay;
+  }
+  
+  .joker-avatar:hover::after {
+    @apply opacity-100;
+  }
+
+  /* CHAOS TEXT */
+  .chaos-text {
+    @apply font-mono text-primary;
+    text-shadow: 0 0 10px hsl(120 100% 50% / 0.5);
+    animation: flicker var(--animation-flicker);
+  }
+
+  /* TERMINAL STYLE */
+  .terminal {
+    @apply bg-black/90 border border-primary/50 font-mono text-primary;
+    @apply p-4 rounded-none shadow-digital;
+    background-image: 
+      linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 255, 0, 0.03) 50%),
+      linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    background-size: 100% 2px, 3px 100%;
+  }
+}
+
+@layer utilities {
+  /* KEYFRAME ANIMATIONS */
+  @keyframes glitch-1 {
+    0%, 14%, 15%, 49%, 50%, 99%, 100% { 
+      transform: translate(0);
+    }
+    15%, 49% { 
+      transform: translate(-2px, 1px);
+    }
+  }
+  
+  @keyframes glitch-2 {
+    0%, 20%, 21%, 62%, 63%, 99%, 100% { 
+      transform: translate(0);
+    }
+    21%, 62% { 
+      transform: translate(2px, -1px);
+    }
+  }
+  
+  @keyframes chaos-grain {
+    0%, 100% { 
+      opacity: 1;
+    }
+    50% { 
+      opacity: 0.8;
+    }
+  }
+  
+  @keyframes flicker {
+    0%, 100% { 
+      opacity: 1;
+    }
+    50% { 
+      opacity: 0.8;
+    }
+  }
+  
+  @keyframes scan-lines {
+    0% { 
+      background-position: 0 0;
+    }
+    100% { 
+      background-position: 0 100px;
+    }
+  }
+
+  @keyframes pulse-chaos {
+    0%, 100% {
+      box-shadow: 0 0 20px hsl(120 100% 50% / 0.4);
+    }
+    50% {
+      box-shadow: 0 0 40px hsl(280 100% 65% / 0.6);
+    }
+  }
+
+  /* UTILITY CLASSES */
+  .animate-glitch {
+    animation: glitch-1 0.3s infinite linear;
+  }
+  
+  .animate-flicker {
+    animation: flicker var(--animation-flicker);
+  }
+  
+  .animate-pulse-chaos {
+    animation: pulse-chaos 2s infinite;
+  }
+  
+  .text-shadow-cyber {
+    text-shadow: 0 0 10px currentColor;
+  }
+  
+  .bg-grain {
+    background-image: 
+      radial-gradient(circle at 25% 25%, hsl(120 100% 50% / 0.1) 1px, transparent 1px),
+      radial-gradient(circle at 75% 75%, hsl(280 100% 65% / 0.1) 1px, transparent 1px);
+    background-size: 20px 20px, 30px 30px;
   }
 }
