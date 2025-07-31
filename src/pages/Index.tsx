@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,14 +29,14 @@ const Index = () => {
     generateReport
   } = useAgentSystem();
 
-  const handleCreateProject = (e: React.FormEvent) => {
+  const handleCreateProject = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (projectName.trim() && projectDescription.trim()) {
       createProject(projectName.trim(), projectDescription.trim());
       setProjectName('');
       setProjectDescription('');
     }
-  };
+  }, [projectName, projectDescription, createProject]);
 
   if (!project) {
     return (

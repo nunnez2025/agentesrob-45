@@ -427,30 +427,31 @@ SEJA O MESTRE DA DOCUMENTAÇÃO! Crie o README mais atrativo para: ${description
     
     // Filtrar prompts baseados na análise da descrição
     const prompts = this.getFilteredPrompts(agent.role, project.name, project.description, analysis);
-    const files: ProjectFile[] = [];
+    
+    // Paralelizar as chamadas à API de IA para melhor performance
+    const results = await Promise.allSettled(prompts.map(prompt =>
+      aiService.generateResponse(prompt, agent.role)
+    ));
 
-    for (const prompt of prompts) {
-      try {
-        const response = await aiService.generateResponse(prompt, agent.role);
-        
-        // Determine file properties based on content
+    const files: ProjectFile[] = [];
+    
+    results.forEach((result, index) => {
+      if (result.status === 'fulfilled' && result.value.success) {
+        const response = result.value;
         const fileName = this.extractFileName(response.content, agent.role);
         const fileType = this.determineFileType(fileName, agent.role);
         const filePath = this.generateFilePath(fileName, agent.role);
-
+        
         files.push({
           name: fileName,
           content: this.cleanContent(response.content),
           type: fileType,
           path: filePath
         });
-
-        // Add delay to respect rate limits
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } catch (error) {
-        console.error(`Error generating file for ${agent.role}:`, error);
+      } else {
+        console.error(`Falha ao gerar arquivo para o prompt ${index}:`, result.status === 'rejected' ? result.reason : 'Erro desconhecido');
       }
-    }
+    });
 
     return files;
   }

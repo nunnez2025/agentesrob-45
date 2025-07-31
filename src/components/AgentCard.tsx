@@ -1,3 +1,4 @@
+import React from 'react';
 import { Agent } from '@/types/agent';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -34,7 +35,7 @@ const roleColors = {
   'seo-specialist': 'bg-agent-analyst'
 };
 
-export const AgentCard = ({ agent, isActive, onClick }: AgentCardProps) => {
+export const AgentCard = React.memo(({ agent, isActive, onClick }: AgentCardProps) => {
   return (
     <Card 
       className={cn(
@@ -100,4 +101,4 @@ export const AgentCard = ({ agent, isActive, onClick }: AgentCardProps) => {
       </CardContent>
     </Card>
   );
-};
+});

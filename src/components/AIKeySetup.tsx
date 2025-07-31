@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -142,7 +142,16 @@ export const AIKeySetup = () => {
   };
 
   const availableProviders = aiService.getAvailableProviders();
-  const configuredCount = availableProviders.filter(p => p.hasKey).length;
+  
+  // Memoizar o cálculo de configuredCount
+  const configuredCount = useMemo(() => {
+    return availableProviders.filter(p => p.hasKey).length;
+  }, [availableProviders]);
+
+  // Memoizar o cálculo da porcentagem de capacidade
+  const capacityPercentage = useMemo(() => {
+    return Math.round((configuredCount / providers.length) * 100);
+  }, [configuredCount, providers.length]);
 
   return (
     <div className="space-y-6">
@@ -177,7 +186,7 @@ export const AIKeySetup = () => {
         <Card>
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold text-orange-600">
-              {Math.round((configuredCount / providers.length) * 100)}%
+              {capacityPercentage}%
             </div>
             <div className="text-sm text-muted-foreground">Capacidade</div>
           </CardContent>
