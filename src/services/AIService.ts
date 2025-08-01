@@ -14,6 +14,9 @@ interface AIResponse {
 }
 
 class AIService {
+  private keyQueues: Map<string, string[]> = new Map();
+  private invalidKeys: Set<string> = new Set();
+  
   private providers: AIProvider[] = [
     {
       name: 'OpenAI',
@@ -186,13 +189,65 @@ class AIService {
     'microsoft/CodeT5p-770M-py'
   ];
 
-  // API Keys storage
+  // API Keys storage and queue management
+  private loadKeyQueues(): void {
+    const stored = localStorage.getItem('ai_key_queues');
+    if (stored) {
+      const data = JSON.parse(stored);
+      this.keyQueues = new Map(Object.entries(data));
+    }
+  }
+
+  private saveKeyQueues(): void {
+    const data = Object.fromEntries(this.keyQueues);
+    localStorage.setItem('ai_key_queues', JSON.stringify(data));
+  }
+
+  private getNextValidKey(provider: string): string | null {
+    const keys = this.keyQueues.get(provider) || [];
+    return keys.find(key => !this.invalidKeys.has(key)) || null;
+  }
+
+  private markKeyAsInvalid(key: string, provider: string): void {
+    this.invalidKeys.add(key);
+    const keys = this.keyQueues.get(provider) || [];
+    const validKeys = keys.filter(k => k !== key);
+    this.keyQueues.set(provider, validKeys);
+    this.saveKeyQueues();
+    console.log(`🔥 Chave inválida removida do ${provider}:`, key.substring(0, 8) + '...');
+  }
+
   private getApiKey(provider: string): string | null {
-    return localStorage.getItem(`ai_api_key_${provider.toLowerCase()}`);
+    this.loadKeyQueues();
+    return this.getNextValidKey(provider) || localStorage.getItem(`ai_api_key_${provider.toLowerCase()}`);
   }
 
   public setApiKey(provider: string, apiKey: string): void {
     localStorage.setItem(`ai_api_key_${provider.toLowerCase()}`, apiKey);
+  }
+
+  public addApiKey(provider: string, apiKey: string): void {
+    this.loadKeyQueues();
+    const keys = this.keyQueues.get(provider) || [];
+    if (!keys.includes(apiKey)) {
+      keys.push(apiKey);
+      this.keyQueues.set(provider, keys);
+      this.saveKeyQueues();
+      console.log(`✅ Nova chave adicionada à fila do ${provider}`);
+    }
+  }
+
+  public removeApiKey(provider: string, apiKey: string): void {
+    this.loadKeyQueues();
+    const keys = this.keyQueues.get(provider) || [];
+    const updatedKeys = keys.filter(key => key !== apiKey);
+    this.keyQueues.set(provider, updatedKeys);
+    this.saveKeyQueues();
+  }
+
+  public getProviderKeys(provider: string): string[] {
+    this.loadKeyQueues();
+    return this.keyQueues.get(provider) || [];
   }
 
   public async testApiKey(provider: string, apiKey: string): Promise<{ success: boolean; error?: string }> {
@@ -265,6 +320,12 @@ class AIService {
 
       if (!response.ok) {
         const errorText = await response.text();
+        
+        // Mark key as invalid for certain errors
+        if (response.status === 401 || response.status === 403) {
+          this.markKeyAsInvalid(apiKey, provider.name);
+        }
+        
         return {
           success: false,
           content: '',

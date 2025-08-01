@@ -1,17 +1,18 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Key, CheckCircle, AlertCircle, Zap, Brain, Rocket, Settings } from 'lucide-react';
+import { Key, CheckCircle, AlertCircle, Zap, Brain, Rocket, Settings, Trash2, Users } from 'lucide-react';
 import { aiService } from '@/services/AIService';
 import { useToast } from '@/hooks/use-toast';
 
 export const AIKeySetup = () => {
   const [keys, setKeys] = useState<Record<string, string>>({});
   const [testing, setTesting] = useState<Record<string, boolean>>({});
+  const [keyQueues, setKeyQueues] = useState<Record<string, string[]>>({});
   const { toast } = useToast();
 
   const providers = [
@@ -70,7 +71,7 @@ export const AIKeySetup = () => {
     setKeys(prev => ({ ...prev, [provider]: value }));
   };
 
-  const testAndSaveKey = async (provider: string) => {
+  const addKeyToQueue = async (provider: string) => {
     const key = keys[provider];
     if (!key?.trim()) {
       toast({
@@ -88,10 +89,15 @@ export const AIKeySetup = () => {
       const testResponse = await aiService.testApiKey(provider, key);
       
       if (testResponse.success) {
-        aiService.setApiKey(provider, key);
+        aiService.addApiKey(provider, key);
+        setKeyQueues(prev => ({
+          ...prev,
+          [provider]: [...(prev[provider] || []), key]
+        }));
+        setKeys(prev => ({ ...prev, [provider]: '' })); // Clear input
         toast({
-          title: "✅ API Real Ativada",
-          description: `${provider} conectado e funcionando com capacidade máxima!`,
+          title: "✅ Chave Adicionada à Fila",
+          description: `${provider}: Chave validada e adicionada ao sistema de fallback!`,
         });
       } else {
         throw new Error(testResponse.error || 'Chave de API inválida');
@@ -125,12 +131,37 @@ export const AIKeySetup = () => {
     }
   };
 
+  const removeKeyFromQueue = (provider: string, keyToRemove: string) => {
+    aiService.removeApiKey(provider, keyToRemove);
+    setKeyQueues(prev => ({
+      ...prev,
+      [provider]: (prev[provider] || []).filter(key => key !== keyToRemove)
+    }));
+    toast({
+      title: "🗑️ Chave Removida",
+      description: `Chave removida da fila do ${provider}`,
+    });
+  };
+
+  const loadKeyQueues = () => {
+    const allQueues: Record<string, string[]> = {};
+    providers.forEach(provider => {
+      allQueues[provider.name] = aiService.getProviderKeys(provider.name);
+    });
+    setKeyQueues(allQueues);
+  };
+
+  // Load queues on component mount
+  useEffect(() => {
+    loadKeyQueues();
+  }, []);
+
   const configureAllKeys = async () => {
     const validKeys = Object.entries(keys).filter(([_, key]) => key.trim());
     
     for (const [provider, key] of validKeys) {
       if (!testing[provider]) {
-        await testAndSaveKey(provider);
+        await addKeyToQueue(provider);
         await new Promise(resolve => setTimeout(resolve, 1000)); // Rate limiting
       }
     }
@@ -242,7 +273,7 @@ export const AIKeySetup = () => {
                   />
                 </div>
                 <Button 
-                  onClick={() => testAndSaveKey(provider.key)}
+                  onClick={() => addKeyToQueue(provider.key)}
                   disabled={!keys[provider.key] || isLoading}
                   className="w-full"
                   variant={hasKey ? "secondary" : "default"}
@@ -264,6 +295,33 @@ export const AIKeySetup = () => {
                     </>
                   )}
                 </Button>
+                
+                {/* Key Queue Display */}
+                {keyQueues[provider.name] && keyQueues[provider.name].length > 0 && (
+                  <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Users className="h-4 w-4" />
+                      <span className="text-sm font-medium">Fila de Chaves ({keyQueues[provider.name].length})</span>
+                    </div>
+                    <div className="space-y-1 max-h-32 overflow-y-auto">
+                      {keyQueues[provider.name].map((key, index) => (
+                        <div key={index} className="flex items-center justify-between text-xs bg-background/50 p-2 rounded">
+                          <span className="font-mono">
+                            {key.substring(0, 8)}...{key.slice(-4)}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => removeKeyFromQueue(provider.name, key)}
+                            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           );
